@@ -42,7 +42,7 @@ export class EhrController {
   // ============================================================================
 
   @Get('patients/:patientId/timeline')
-  @Roles('MEDICO', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO', 'ADMIN_CLINICA', 'AUDITOR')
+  @Roles('DOCTOR', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO', 'ADMIN_CLINICA', 'AUDITOR')
   @ApiOperation({ summary: 'Timeline completa do paciente' })
   getTimeline(
     @Param('patientId') patientId: string,
@@ -68,14 +68,14 @@ export class EhrController {
   // ============================================================================
 
   @Post('notes/soap')
-  @Roles('MEDICO', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO')
+  @Roles('DOCTOR', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO')
   @ApiOperation({ summary: 'Criar evolução SOAP' })
   createSoapNote(@Body() dto: CreateSoapNoteDto, @Request() req: any) {
     return this.service.createSoapNote(dto, req.user.userId, req.user.tenantId);
   }
 
   @Post('notes/sign')
-  @Roles('MEDICO', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO')
+  @Roles('DOCTOR', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO')
   @ApiOperation({ summary: 'Assinar nota clínica' })
   signNote(@Body() dto: SignNoteDto, @Request() req: any) {
     return this.service.signClinicalNote(dto.noteId, req.user.userId, req.user.tenantId);
@@ -86,14 +86,14 @@ export class EhrController {
   // ============================================================================
 
   @Post('observations/vital-signs')
-  @Roles('MEDICO', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO', 'RECEPCAO')
+  @Roles('DOCTOR', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO', 'RECEPCAO')
   @ApiOperation({ summary: 'Registrar sinais vitais' })
   recordVitalSigns(@Body() dto: RecordVitalSignsDto, @Request() req: any) {
     return this.service.recordVitalSigns(dto, req.user.userId, req.user.tenantId);
   }
 
   @Get('patients/:patientId/vital-signs')
-  @Roles('MEDICO', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO', 'ADMIN_CLINICA')
+  @Roles('DOCTOR', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO', 'ADMIN_CLINICA')
   @ApiOperation({ summary: 'Histórico de sinais vitais' })
   getVitalSigns(
     @Param('patientId') patientId: string,
@@ -111,14 +111,14 @@ export class EhrController {
   // ============================================================================
 
   @Post('prescriptions')
-  @Roles('MEDICO', 'DENTISTA')
+  @Roles('DOCTOR', 'DENTISTA')
   @ApiOperation({ summary: 'Criar prescrição' })
   createPrescription(@Body() dto: CreatePrescriptionDto, @Request() req: any) {
     return this.service.createPrescription(dto, req.user.userId, req.user.tenantId);
   }
 
   @Post('prescriptions/:id/sign')
-  @Roles('MEDICO', 'DENTISTA')
+  @Roles('DOCTOR', 'DENTISTA')
   @ApiOperation({ summary: 'Assinar prescrição' })
   signPrescription(@Param('id') id: string, @Request() req: any) {
     return this.service.signPrescription(id, req.user.userId, req.user.tenantId);
@@ -129,7 +129,7 @@ export class EhrController {
   // ============================================================================
 
   @Post('allergies')
-  @Roles('MEDICO', 'DENTISTA', 'ENFERMEIRO')
+  @Roles('DOCTOR', 'DENTISTA', 'ENFERMEIRO')
   @ApiOperation({ summary: 'Registrar alergia' })
   createAllergy(@Body() dto: CreateAllergyDto, @Request() req: any) {
     // Implementar
@@ -137,7 +137,7 @@ export class EhrController {
   }
 
   @Get('patients/:patientId/allergies')
-  @Roles('MEDICO', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO', 'RECEPCAO')
+  @Roles('DOCTOR', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO', 'RECEPCAO')
   @ApiOperation({ summary: 'Listar alergias do paciente' })
   getAllergies(@Param('patientId') patientId: string, @Request() req: any) {
     // Implementar
@@ -149,7 +149,7 @@ export class EhrController {
   // ============================================================================
 
   @Post('conditions')
-  @Roles('MEDICO', 'DENTISTA')
+  @Roles('DOCTOR', 'DENTISTA')
   @ApiOperation({ summary: 'Registrar diagnóstico/problema' })
   createCondition(@Body() dto: CreateConditionDto, @Request() req: any) {
     // Implementar
@@ -157,7 +157,7 @@ export class EhrController {
   }
 
   @Get('patients/:patientId/conditions')
-  @Roles('MEDICO', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO')
+  @Roles('DOCTOR', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO')
   @ApiOperation({ summary: 'Listar problemas ativos' })
   getConditions(
     @Param('patientId') patientId: string,
@@ -173,7 +173,7 @@ export class EhrController {
   // ============================================================================
 
   @Post('immunizations')
-  @Roles('MEDICO', 'ENFERMEIRO')
+  @Roles('DOCTOR', 'ENFERMEIRO')
   @ApiOperation({ summary: 'Registrar vacinação' })
   createImmunization(@Body() dto: CreateImmunizationDto, @Request() req: any) {
     // Implementar
@@ -181,7 +181,7 @@ export class EhrController {
   }
 
   @Get('patients/:patientId/immunizations')
-  @Roles('MEDICO', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO', 'RECEPCAO')
+  @Roles('DOCTOR', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO', 'RECEPCAO')
   @ApiOperation({ summary: 'Cartão de vacinas' })
   getImmunizations(@Param('patientId') patientId: string, @Request() req: any) {
     // Implementar
@@ -193,7 +193,7 @@ export class EhrController {
   // ============================================================================
 
   @Post('documents/upload')
-  @Roles('MEDICO', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO', 'RECEPCAO')
+  @Roles('DOCTOR', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO', 'RECEPCAO')
   @ApiOperation({ summary: 'Upload de documento' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
@@ -216,7 +216,7 @@ export class EhrController {
   }
 
   @Get('documents/:id/download')
-  @Roles('MEDICO', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO', 'RECEPCAO', 'ADMIN_CLINICA')
+  @Roles('DOCTOR', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO', 'RECEPCAO', 'ADMIN_CLINICA')
   @ApiOperation({ summary: 'Download de documento (presigned URL)' })
   downloadDocument(@Param('id') id: string, @Request() req: any) {
     return this.service.getPresignedDownloadUrl(id, req.user.userId, req.user.tenantId);
@@ -227,7 +227,7 @@ export class EhrController {
   // ============================================================================
 
   @Get('patients/:patientId/export/fhir')
-  @Roles('MEDICO', 'ADMIN_CLINICA', 'AUDITOR')
+  @Roles('DOCTOR', 'ADMIN_CLINICA', 'AUDITOR')
   @ApiOperation({ summary: 'Exportar prontuário em FHIR Bundle' })
   exportFhir(@Param('patientId') patientId: string, @Request() req: any) {
     return this.service.exportPatientBundle(patientId, req.user.userId, req.user.tenantId);
@@ -238,7 +238,7 @@ export class EhrController {
   // ============================================================================
 
   @Post('encounters')
-  @Roles('MEDICO', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO', 'RECEPCAO')
+  @Roles('DOCTOR', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO', 'RECEPCAO')
   @ApiOperation({ summary: 'Criar consulta/atendimento' })
   createEncounter(@Body() dto: CreateEncounterDto, @Request() req: any) {
     // Implementar
@@ -246,7 +246,7 @@ export class EhrController {
   }
 
   @Post('encounters/:id/start')
-  @Roles('MEDICO', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO')
+  @Roles('DOCTOR', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO')
   @ApiOperation({ summary: 'Iniciar atendimento' })
   startEncounter(@Param('id') id: string, @Request() req: any) {
     // Implementar
@@ -254,7 +254,7 @@ export class EhrController {
   }
 
   @Post('encounters/:id/finish')
-  @Roles('MEDICO', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO')
+  @Roles('DOCTOR', 'DENTISTA', 'PSICOLOGO', 'ENFERMEIRO')
   @ApiOperation({ summary: 'Finalizar atendimento' })
   finishEncounter(@Param('id') id: string, @Request() req: any) {
     // Implementar
@@ -266,7 +266,7 @@ export class EhrController {
   // ============================================================================
 
   @Post('break-the-glass')
-  @Roles('MEDICO', 'ENFERMEIRO')
+  @Roles('DOCTOR', 'ENFERMEIRO')
   @ApiOperation({ 
     summary: 'Acesso de emergência com justificativa',
     description: 'Permite acesso temporário a prontuários restritos em situações de emergência. Requer justificativa detalhada e gera auditoria reforçada.'
