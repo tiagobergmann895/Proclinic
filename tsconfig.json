@@ -16,8 +16,8 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "noEmitOnError": false,
     "types": ["node"]
   },
-  "exclude": ["node_modules", "dist", "frontend", "backend"]
+  "include": ["backend/src/**/*"],
+  "exclude": ["node_modules", "dist", "frontend", "src"]
 }
