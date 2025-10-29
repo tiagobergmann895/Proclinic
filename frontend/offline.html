@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proclinic - Sistema Offline</title>
+    <style>
+        /* CSS inline para funcionar offline */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            color: #2d3748;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+        
+        .status {
+            background: #48bb78;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .stat:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: #4a5568;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            color: #2d3748;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .button {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .button:hover {
+            background: #3182ce;
+        }
+        
+        .button.danger {
+            background: #e53e3e;
+        }
+        
+        .button.danger:hover {
+            background: #c53030;
+        }
+        
+        .button.success {
+            background: #38a169;
+        }
+        
+        .button.success:hover {
+            background: #2f855a;
+        }
+        
+        .data-table {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .data-table h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .data-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f7fafc;
+        }
+        
+        .data-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .data-item h4 {
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        
+        .data-item p {
+            color: #4a5568;
+            font-size: 0.9rem;
+            margin-bottom: 3px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #4a5568;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4299e1;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            padding: 20px;
+        }
+        
+        .footer p {
+            margin-bottom: 5px;
+        }
+        
+        .footer a {
+            color: #90cdf4;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🏥 Proclinic - Sistema Offline</h1>
+            <p>Sistema de Gestão Clínica - Funcionando 100% Offline</p>
+        </div>
+
+        <!-- Status -->
+        <div class="status">
+            ✅ Sistema funcionando offline - Sem dependências de internet
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid">
+            <div class="card">
+                <h3>👥 Pacientes</h3>
+                <div class="stat">
+                    <span class="stat-label">Total de Pacientes:</span>
+                    <span class="stat-value" id="total-patients">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Novos este mês:</span>
+                    <span class="stat-value" id="new-patients">0</span>
+                </div>
+                <button class="button" onclick="showPatients()">Ver Pacientes</button>
+            </div>
+
+            <div class="card">
+                <h3>📦 Estoque</h3>
+                <div class="stat">
+                    <span class="stat-label">Total de Itens:</span>
+                    <span class="stat-value" id="total-items">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Valor Total:</span>
+                    <span class="stat-value" id="inventory-value">R$ 0,00</span>
+                </div>
+                <button class="button" onclick="showItems()">Ver Itens</button>
+            </div>
+
+            <div class="card">
+                <h3>🏥 Procedimentos</h3>
+                <div class="stat">
+                    <span class="stat-label">Total de Procedimentos:</span>
+                    <span class="stat-value" id="total-procedures">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Receita Total:</span>
+                    <span class="stat-value" id="total-revenue">R$ 0,00</span>
+                </div>
+                <button class="button" onclick="showProcedures()">Ver Procedimentos</button>
+            </div>
+        </div>
+
+        <!-- Data Display -->
+        <div id="data-display" class="data-table hidden">
+            <h3 id="data-title">Dados</h3>
+            <div id="data-content"></div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="card">
+            <h3>⚙️ Painel de Controle</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                <button class="button success" onclick="initializeData()">🚀 Inicializar Dados</button>
+                <button class="button" onclick="exportData()">📤 Exportar Dados</button>
+                <button class="button" onclick="importData()">📥 Importar Dados</button>
+                <button class="button danger" onclick="clearData()">🗑️ Limpar Dados</button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Proclinic - Sistema de Gestão Clínica</p>
+            <p>Versão Offline - Funcionando sem internet</p>
+            <p>Dados salvos localmente no navegador</p>
+        </div>
+    </div>
+
+    <script>
+        // Dados mock offline
+        const mockData = {
+            patients: [
+                {
+                    id: '1',
+                    name: 'João Silva',
+                    email: 'joao@email.com',
+                    phone: '(11) 99999-9999',
+                    birthDate: '1985-05-15',
+                    gender: 'M',
+                    address: 'Rua das Flores, 123',
+                    city: 'São Paulo',
+                    state: 'SP',
+                    zipCode: '01234-567',
+                    cpf: '123.456.789-00',
+                    allergies: ['Penicilina', 'Dipirona'],
+                    medicalHistory: ['Hipertensão', 'Diabetes tipo 2'],
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: '2',
+                    name: 'Maria Santos',
+                    email: 'maria@email.com',
+                    phone: '(11) 88888-8888',
+                    birthDate: '1990-08-20',
+                    gender: 'F',
+                    address: 'Av. Paulista, 456',
+                    city: 'São Paulo',
+                    state: 'SP',
+                    zipCode: '01310-100',
+                    cpf: '987.654.321-00',
+                    allergies: ['Iodo'],
+                    medicalHistory: ['Asma'],
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: '3',
+                    name: 'Pedro Costa',
+                    email: 'pedro@email.com',
+                    phone: '(11) 77777-7777',
+                    birthDate: '1978-12-10',
+                    gender: 'M',
+                    address: 'Rua Augusta, 789',
+                    city: 'São Paulo',
+                    state: 'SP',
+                    zipCode: '01305-100',
+                    cpf: '456.789.123-00',
+                    allergies: [],
+                    medicalHistory: ['Hipertensão'],
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: '4',
+                    name: 'Ana Oliveira',
+                    email: 'ana@email.com',
+                    phone: '(11) 66666-6666',
+                    birthDate: '1995-03-25',
+                    gender: 'F',
+                    address: 'Rua Consolação, 321',
+                    city: 'São Paulo',
+                    state: 'SP',
+                    zipCode: '01302-001',
+                    cpf: '789.123.456-00',
+                    allergies: ['Sulfa'],
+                    medicalHistory: [],
+                    createdAt: new Date().toISOString()
+                }
+            ],
+            items: [
+                {
+                    id: '1',
+                    name: 'Seringa 5ml',
+                    description: 'Seringa descartável 5ml com agulha',
+                    category: 'Material Médico',
+                    unit: 'un',
+                    currentStock: 100,
+                    minStock: 20,
+                    maxStock: 200,
+                    costPrice: 2.50,
+                    salePrice: 5.00,
+                    supplier: 'Fornecedor A',
+                    location: 'Estoque A',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: '2',
+                    name: 'Algodão',
+                    description: 'Algodão hidrófilo estéril',
+                    category: 'Material Médico',
+                    unit: 'kg',
+                    currentStock: 50,
+                    minStock: 10,
+                    maxStock: 100,
+                    costPrice: 15.00,
+                    salePrice: 30.00,
+                    supplier: 'Fornecedor B',
+                    location: 'Estoque B',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: '3',
+                    name: 'Gaze',
+                    description: 'Gaze estéril 10x10cm',
+                    category: 'Material Médico',
+                    unit: 'un',
+                    currentStock: 200,
+                    minStock: 50,
+                    maxStock: 500,
+                    costPrice: 0.50,
+                    salePrice: 1.00,
+                    supplier: 'Fornecedor C',
+                    location: 'Estoque A',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: '4',
+                    name: 'Luvas Cirúrgicas',
+                    description: 'Luvas cirúrgicas estéreis tamanho M',
+                    category: 'Material Médico',
+                    unit: 'par',
+                    currentStock: 500,
+                    minStock: 100,
+                    maxStock: 1000,
+                    costPrice: 0.80,
+                    salePrice: 1.50,
+                    supplier: 'Fornecedor A',
+                    location: 'Estoque C',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: '5',
+                    name: 'Máscara N95',
+                    description: 'Máscara de proteção N95',
+                    category: 'EPI',
+                    unit: 'un',
+                    currentStock: 300,
+                    minStock: 50,
+                    maxStock: 600,
+                    costPrice: 3.00,
+                    salePrice: 6.00,
+                    supplier: 'Fornecedor D',
+                    location: 'Estoque B',
+                    createdAt: new Date().toISOString()
+                }
+            ],
+            procedures: [
+                {
+                    id: '1',
+                    patientId: '1',
+                    patientName: 'João Silva',
+                    type: 'Consulta',
+                    description: 'Consulta de rotina - cardiologia',
+                    status: 'completed',
+                    startTime: new Date().toISOString(),
+                    endTime: new Date(Date.now() + 3600000).toISOString(),
+                    cost: 150.00,
+                    price: 200.00,
+                    doctor: 'Dr. João Silva',
+                    notes: 'Paciente com pressão arterial controlada. Manter medicação.',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: '2',
+                    patientId: '2',
+                    patientName: 'Maria Santos',
+                    type: 'Exame',
+                    description: 'Exame de sangue completo',
+                    status: 'in_progress',
+                    startTime: new Date().toISOString(),
+                    cost: 80.00,
+                    price: 120.00,
+                    doctor: 'Dr. João Silva',
+                    notes: 'Coleta realizada. Aguardando resultados do laboratório.',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: '3',
+                    patientId: '3',
+                    patientName: 'Pedro Costa',
+                    type: 'Procedimento',
+                    description: 'Curativo pós-cirúrgico',
+                    status: 'scheduled',
+                    startTime: new Date(Date.now() + 86400000).toISOString(),
+                    cost: 50.00,
+                    price: 80.00,
+                    doctor: 'Enfermeira Maria',
+                    notes: 'Agendado para amanhã às 14h.',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: '4',
+                    patientId: '4',
+                    patientName: 'Ana Oliveira',
+                    type: 'Consulta',
+                    description: 'Consulta de rotina - ginecologia',
+                    status: 'scheduled',
+                    startTime: new Date(Date.now() + 172800000).toISOString(),
+                    cost: 120.00,
+                    price: 180.00,
+                    doctor: 'Dr. João Silva',
+                    notes: 'Primeira consulta. Verificar histórico médico.',
+                    createdAt: new Date().toISOString()
+                }
+            ]
+        };
+
+        // Funções de gerenciamento de dados
+        function initializeData() {
+            console.log('🚀 Inicializando dados offline...');
+            
+            // Salvar dados no localStorage
+            localStorage.setItem('proclinic-patients-offline', JSON.stringify(mockData.patients));
+            localStorage.setItem('proclinic-items-offline', JSON.stringify(mockData.items));
+            localStorage.setItem('proclinic-procedures-offline', JSON.stringify(mockData.procedures));
+            
+            console.log('✅ Dados offline inicializados!');
+            loadStats();
+            alert('✅ Dados inicializados com sucesso!');
+        }
+
+        function loadStats() {
+            const patients = JSON.parse(localStorage.getItem('proclinic-patients-offline') || '[]');
+            const items = JSON.parse(localStorage.getItem('proclinic-items-offline') || '[]');
+            const procedures = JSON.parse(localStorage.getItem('proclinic-procedures-offline') || '[]');
+            
+            // Calcular estatísticas
+            const totalRevenue = procedures.reduce((sum, p) => sum + (p.price || 0), 0);
+            const inventoryValue = items.reduce((sum, i) => sum + (i.currentStock * i.costPrice), 0);
+            const newPatients = patients.filter(p => {
+                const created = new Date(p.createdAt);
+                const now = new Date();
+                const diffTime = Math.abs(now - created);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays <= 30;
+            }).length;
+            
+            // Atualizar interface
+            document.getElementById('total-patients').textContent = patients.length;
+            document.getElementById('new-patients').textContent = newPatients;
+            document.getElementById('total-items').textContent = items.length;
+            document.getElementById('inventory-value').textContent = `R$ ${inventoryValue.toFixed(2)}`;
+            document.getElementById('total-procedures').textContent = procedures.length;
+            document.getElementById('total-revenue').textContent = `R$ ${totalRevenue.toFixed(2)}`;
+        }
+
+        function showPatients() {
+            const patients = JSON.parse(localStorage.getItem('proclinic-patients-offline') || '[]');
+            const dataDisplay = document.getElementById('data-display');
+            const dataTitle = document.getElementById('data-title');
+            const dataContent = document.getElementById('data-content');
+            
+            dataTitle.textContent = '👥 Pacientes Cadastrados';
+            dataContent.innerHTML = patients.map(patient => `
+                <div class="data-item">
+                    <h4>${patient.name}</h4>
+                    <p><strong>Email:</strong> ${patient.email}</p>
+                    <p><strong>Telefone:</strong> ${patient.phone}</p>
+                    <p><strong>Endereço:</strong> ${patient.address}, ${patient.city} - ${patient.state}</p>
+                    <p><strong>CPF:</strong> ${patient.cpf}</p>
+                    <p><strong>Alergias:</strong> ${patient.allergies.join(', ') || 'Nenhuma'}</p>
+                    <p><strong>Histórico:</strong> ${patient.medicalHistory.join(', ') || 'Nenhum'}</p>
+                </div>
+            `).join('');
+            
+            dataDisplay.classList.remove('hidden');
+        }
+
+        function showItems() {
+            const items = JSON.parse(localStorage.getItem('proclinic-items-offline') || '[]');
+            const dataDisplay = document.getElementById('data-display');
+            const dataTitle = document.getElementById('data-title');
+            const dataContent = document.getElementById('data-content');
+            
+            dataTitle.textContent = '📦 Itens em Estoque';
+            dataContent.innerHTML = items.map(item => `
+                <div class="data-item">
+                    <h4>${item.name}</h4>
+                    <p><strong>Descrição:</strong> ${item.description}</p>
+                    <p><strong>Categoria:</strong> ${item.category}</p>
+                    <p><strong>Estoque:</strong> ${item.currentStock} ${item.unit}</p>
+                    <p><strong>Estoque Mínimo:</strong> ${item.minStock} ${item.unit}</p>
+                    <p><strong>Preço de Custo:</strong> R$ ${item.costPrice.toFixed(2)}</p>
+                    <p><strong>Preço de Venda:</strong> R$ ${item.salePrice.toFixed(2)}</p>
+                    <p><strong>Fornecedor:</strong> ${item.supplier}</p>
+                    <p><strong>Localização:</strong> ${item.location}</p>
+                </div>
+            `).join('');
+            
+            dataDisplay.classList.remove('hidden');
+        }
+
+        function showProcedures() {
+            const procedures = JSON.parse(localStorage.getItem('proclinic-procedures-offline') || '[]');
+            const dataDisplay = document.getElementById('data-display');
+            const dataTitle = document.getElementById('data-title');
+            const dataContent = document.getElementById('data-content');
+            
+            dataTitle.textContent = '🏥 Procedimentos';
+            dataContent.innerHTML = procedures.map(procedure => `
+                <div class="data-item">
+                    <h4>${procedure.description}</h4>
+                    <p><strong>Paciente:</strong> ${procedure.patientName}</p>
+                    <p><strong>Tipo:</strong> ${procedure.type}</p>
+                    <p><strong>Status:</strong> ${procedure.status === 'completed' ? 'Concluído' : procedure.status === 'in_progress' ? 'Em Andamento' : 'Agendado'}</p>
+                    <p><strong>Valor:</strong> R$ ${procedure.price.toFixed(2)}</p>
+                    <p><strong>Médico:</strong> ${procedure.doctor}</p>
+                    <p><strong>Observações:</strong> ${procedure.notes}</p>
+                </div>
+            `).join('');
+            
+            dataDisplay.classList.remove('hidden');
+        }
+
+        function exportData() {
+            const patients = JSON.parse(localStorage.getItem('proclinic-patients-offline') || '[]');
+            const items = JSON.parse(localStorage.getItem('proclinic-items-offline') || '[]');
+            const procedures = JSON.parse(localStorage.getItem('proclinic-procedures-offline') || '[]');
+            
+            const data = {
+                patients,
+                items,
+                procedures,
+                exportedAt: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `proclinic-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Dados exportados com sucesso!');
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            
+                            if (data.patients) localStorage.setItem('proclinic-patients-offline', JSON.stringify(data.patients));
+                            if (data.items) localStorage.setItem('proclinic-items-offline', JSON.stringify(data.items));
+                            if (data.procedures) localStorage.setItem('proclinic-procedures-offline', JSON.stringify(data.procedures));
+                            
+                            loadStats();
+                            alert('✅ Dados importados com sucesso!');
+                        } catch (error) {
+                            alert('❌ Erro ao importar dados. Verifique o arquivo.');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        function clearData() {
+            if (confirm('⚠️ Tem certeza que deseja limpar todos os dados? Esta ação não pode ser desfeita.')) {
+                localStorage.removeItem('proclinic-patients-offline');
+                localStorage.removeItem('proclinic-items-offline');
+                localStorage.removeItem('proclinic-procedures-offline');
+                
+                loadStats();
+                document.getElementById('data-display').classList.add('hidden');
+                alert('✅ Dados limpos com sucesso!');
+            }
+        }
+
+        // Inicializar ao carregar a página
+        window.onload = function() {
+            loadStats();
+        };
+    </script>
+</body>
+</html>
+
+
+
+

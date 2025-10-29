@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proclinic - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background: #f7fafc;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-name {
+            color: #4a5568;
+            font-weight: 500;
+        }
+        
+        .logout-button {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .logout-button:hover {
+            background: #c53030;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .success-banner {
+            background: #c6f6d5;
+            color: #2f855a;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #4299e1;
+        }
+        
+        .stat-card.patients {
+            border-left-color: #4299e1;
+        }
+        
+        .stat-card.items {
+            border-left-color: #38a169;
+        }
+        
+        .stat-card.procedures {
+            border-left-color: #9f7aea;
+        }
+        
+        .stat-card.revenue {
+            border-left-color: #ed8936;
+        }
+        
+        .stat-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+            margin-right: 0.75rem;
+        }
+        
+        .stat-title {
+            color: #4a5568;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            color: #2d3748;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-description {
+            color: #718096;
+            font-size: 0.8rem;
+        }
+        
+        .data-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            color: #2d3748;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        
+        .data-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #f7fafc;
+        }
+        
+        .data-item h4 {
+            color: #2d3748;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .data-item p {
+            color: #4a5568;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+        
+        .status-completed {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+        
+        .status-in-progress {
+            background: #fef5e7;
+            color: #d69e2e;
+        }
+        
+        .status-scheduled {
+            background: #bee3f8;
+            color: #2b6cb0;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+        
+        .action-button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .primary-button {
+            background: #4299e1;
+            color: white;
+        }
+        
+        .primary-button:hover {
+            background: #3182ce;
+        }
+        
+        .secondary-button {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .secondary-button:hover {
+            background: #cbd5e0;
+        }
+        
+        .danger-button {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        .danger-button:hover {
+            background: #c53030;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .data-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏥 Proclinic - Dashboard</h1>
+        <div class="user-info">
+            <span class="user-name" id="user-name">Carregando...</span>
+            <button class="logout-button" onclick="logout()">Sair</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="success-banner">
+            ✅ Sistema Proclinic funcionando perfeitamente! Login realizado com sucesso.
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card patients">
+                <div class="stat-header">
+                    <span class="stat-icon">👥</span>
+                    <span class="stat-title">Pacientes</span>
+                </div>
+                <div class="stat-value" id="total-patients">0</div>
+                <div class="stat-description">Pacientes cadastrados</div>
+            </div>
+
+            <div class="stat-card items">
+                <div class="stat-header">
+                    <span class="stat-icon">📦</span>
+                    <span class="stat-title">Itens</span>
+                </div>
+                <div class="stat-value" id="total-items">0</div>
+                <div class="stat-description">Itens em estoque</div>
+            </div>
+
+            <div class="stat-card procedures">
+                <div class="stat-header">
+                    <span class="stat-icon">🏥</span>
+                    <span class="stat-title">Procedimentos</span>
+                </div>
+                <div class="stat-value" id="total-procedures">0</div>
+                <div class="stat-description">Procedimentos realizados</div>
+            </div>
+
+            <div class="stat-card revenue">
+                <div class="stat-header">
+                    <span class="stat-icon">💰</span>
+                    <span class="stat-title">Receita</span>
+                </div>
+                <div class="stat-value" id="total-revenue">R$ 0,00</div>
+                <div class="stat-description">Receita total</div>
+            </div>
+        </div>
+
+        <div class="data-section">
+            <h2 class="section-title">👥 Pacientes Recentes</h2>
+            <div class="data-grid" id="patients-grid">
+                <!-- Dados serão carregados aqui -->
+            </div>
+        </div>
+
+        <div class="data-section">
+            <h2 class="section-title">📦 Itens em Estoque</h2>
+            <div class="data-grid" id="items-grid">
+                <!-- Dados serão carregados aqui -->
+            </div>
+        </div>
+
+        <div class="data-section">
+            <h2 class="section-title">🏥 Procedimentos Recentes</h2>
+            <div class="data-grid" id="procedures-grid">
+                <!-- Dados serão carregados aqui -->
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-button primary-button" onclick="refreshData()">
+                🔄 Atualizar Dados
+            </button>
+            <button class="action-button secondary-button" onclick="exportData()">
+                📤 Exportar Dados
+            </button>
+            <button class="action-button danger-button" onclick="clearData()">
+                🗑️ Limpar Dados
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Função para carregar dados
+        function loadData() {
+            console.log('📊 Carregando dados do dashboard...');
+            
+            // Carregar dados do localStorage
+            const patients = JSON.parse(localStorage.getItem('proclinic-patients') || '[]');
+            const items = JSON.parse(localStorage.getItem('proclinic-items') || '[]');
+            const procedures = JSON.parse(localStorage.getItem('proclinic-procedures') || '[]');
+            
+            // Atualizar estatísticas
+            document.getElementById('total-patients').textContent = patients.length;
+            document.getElementById('total-items').textContent = items.length;
+            document.getElementById('total-procedures').textContent = procedures.length;
+            
+            // Calcular receita total
+            const totalRevenue = procedures.reduce((sum, proc) => sum + (proc.price || 0), 0);
+            document.getElementById('total-revenue').textContent = `R$ ${totalRevenue.toFixed(2)}`;
+            
+            // Carregar dados dos pacientes
+            const patientsGrid = document.getElementById('patients-grid');
+            patientsGrid.innerHTML = patients.slice(0, 4).map(patient => `
+                <div class="data-item">
+                    <h4>${patient.name}</h4>
+                    <p><strong>Email:</strong> ${patient.email}</p>
+                    <p><strong>Telefone:</strong> ${patient.phone}</p>
+                    <p><strong>Endereço:</strong> ${patient.address}, ${patient.city} - ${patient.state}</p>
+                    <p><strong>CPF:</strong> ${patient.cpf}</p>
+                </div>
+            `).join('');
+            
+            // Carregar dados dos itens
+            const itemsGrid = document.getElementById('items-grid');
+            itemsGrid.innerHTML = items.slice(0, 4).map(item => `
+                <div class="data-item">
+                    <h4>${item.name}</h4>
+                    <p><strong>Descrição:</strong> ${item.description}</p>
+                    <p><strong>Categoria:</strong> ${item.category}</p>
+                    <p><strong>Estoque:</strong> ${item.currentStock} unidades</p>
+                    <p><strong>Preço:</strong> R$ ${item.salePrice.toFixed(2)}</p>
+                </div>
+            `).join('');
+            
+            // Carregar dados dos procedimentos
+            const proceduresGrid = document.getElementById('procedures-grid');
+            proceduresGrid.innerHTML = procedures.slice(0, 4).map(procedure => `
+                <div class="data-item">
+                    <h4>${procedure.description}</h4>
+                    <p><strong>Paciente:</strong> ${procedure.patientName}</p>
+                    <p><strong>Tipo:</strong> ${procedure.type}</p>
+                    <p><strong>Valor:</strong> R$ ${procedure.price.toFixed(2)}</p>
+                    <span class="status-badge status-${procedure.status}">
+                        ${procedure.status === 'completed' ? 'Concluído' : 
+                          procedure.status === 'in_progress' ? 'Em Andamento' : 'Agendado'}
+                    </span>
+                </div>
+            `).join('');
+            
+            console.log('✅ Dados carregados com sucesso!');
+        }
+        
+        // Função para atualizar dados
+        function refreshData() {
+            console.log('🔄 Atualizando dados...');
+            loadData();
+            alert('✅ Dados atualizados com sucesso!');
+        }
+        
+        // Função para exportar dados
+        function exportData() {
+            console.log('📤 Exportando dados...');
+            
+            const patients = JSON.parse(localStorage.getItem('proclinic-patients') || '[]');
+            const items = JSON.parse(localStorage.getItem('proclinic-items') || '[]');
+            const procedures = JSON.parse(localStorage.getItem('proclinic-procedures') || '[]');
+            
+            const data = {
+                patients,
+                items,
+                procedures,
+                exportedAt: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `proclinic-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Dados exportados com sucesso!');
+        }
+        
+        // Função para limpar dados
+        function clearData() {
+            if (confirm('⚠️ Tem certeza que deseja limpar todos os dados? Esta ação não pode ser desfeita.')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                alert('✅ Dados limpos com sucesso!');
+                window.location.href = 'login-funcionando-100.html';
+            }
+        }
+        
+        // Função para logout
+        function logout() {
+            localStorage.removeItem('proclinic-auth');
+            alert('👋 Logout realizado com sucesso!');
+            window.location.href = 'login-funcionando-100.html';
+        }
+        
+        // Carregar dados ao inicializar
+        window.onload = function() {
+            // Verificar se está logado
+            const authData = localStorage.getItem('proclinic-auth');
+            if (!authData) {
+                window.location.href = 'login-funcionando-100.html';
+                return;
+            }
+            
+            try {
+                const parsed = JSON.parse(authData);
+                if (!parsed.isAuthenticated) {
+                    window.location.href = 'login-funcionando-100.html';
+                    return;
+                }
+                
+                // Mostrar nome do usuário
+                document.getElementById('user-name').textContent = `Olá, ${parsed.user.name}`;
+                
+                // Carregar dados
+                loadData();
+                
+            } catch (e) {
+                console.error('Erro ao verificar autenticação:', e);
+                window.location.href = 'login-funcionando-100.html';
+            }
+        };
+    </script>
+</body>
+</html>
+
+
+
+

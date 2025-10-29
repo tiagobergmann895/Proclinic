@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  role         Role
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  procedures   Procedure[] @relation("ProfessionalProcedures")
+  auditLogs    AuditLog[]
+  inventoryMovements InventoryMovement[]
+}
+
+enum Role {
+  recepcao
+  profissional
+  financeiro
+  gestor
+}
+
+model Patient {
+  id              String   @id @default(cuid())
+  name            String
+  birthDate       DateTime?
+  document        String?  @unique
+  phone           String?
+  email           String?
+  address         String?
+  consentGivenAt  DateTime?
+  notes           String?
+  createdAt       DateTime @default(now())
+  procedures      Procedure[]
+}
+
+model Supplier {
+  id      String  @id @default(cuid())
+  name    String
+  cnpj    String? @unique
+  contact String?
+  email   String?
+  phone   String?
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  name        String
+  category    String?
+  unit        String
+  sku         String?  @unique
+  minStock    Float    @default(0)
+  isControlled Boolean @default(false)
+  createdAt   DateTime @default(now())
+  batches     ItemBatch[]
+  movements   InventoryMovement[]
+}
+
+model ItemBatch {
+  id                String   @id @default(cuid())
+  item              Item     @relation(fields: [itemId], references: [id])
+  itemId            String
+  batchCode         String
+  expirationDate    DateTime?
+  unitCost          Decimal  @db.Decimal(12, 2)
+  quantityAvailable Decimal  @db.Decimal(14, 3)
+  createdAt         DateTime @default(now())
+  movements         InventoryMovement[]
+}
+
+enum MovementType {
+  ENTRY
+  EXIT
+  ADJUST
+}
+
+model InventoryMovement {
+  id                 String   @id @default(cuid())
+  item               Item     @relation(fields: [itemId], references: [id])
+  itemId             String
+  batch              ItemBatch? @relation(fields: [batchId], references: [id])
+  batchId            String?
+  type               MovementType
+  quantity           Decimal  @db.Decimal(14, 3)
+  unitCost           Decimal? @db.Decimal(12, 2)
+  reason             String?
+  linkedProcedureId  String?
+  performedBy        User     @relation(fields: [performedByUserId], references: [id])
+  performedByUserId  String
+  createdAt          DateTime @default(now())
+}
+
+model ProcedureType {
+  id                 String  @id @default(cuid())
+  name               String
+  description        String?
+  defaultDurationMin Int
+  defaultItems       Json
+  procedures         Procedure[]
+}
+
+enum ProcedureStatus {
+  SCHEDULED
+  DONE
+  CANCELLED
+}
+
+model Procedure {
+  id                   String   @id @default(cuid())
+  patient              Patient  @relation(fields: [patientId], references: [id])
+  patientId            String
+  professional         User     @relation("ProfessionalProcedures", fields: [professionalUserId], references: [id])
+  professionalUserId   String
+  procedureType        ProcedureType @relation(fields: [procedureTypeId], references: [id])
+  procedureTypeId      String
+  scheduledAt          DateTime
+  startedAt            DateTime?
+  finishedAt           DateTime?
+  room                 String?
+  status               ProcedureStatus @default(SCHEDULED)
+  notes                String?
+  costSheet            CostSheet?
+  payments             Payment[]
+}
+
+model CostSheet {
+  id             String   @id @default(cuid())
+  procedure      Procedure @relation(fields: [procedureId], references: [id])
+  procedureId    String   @unique
+  itemsCost      Decimal  @db.Decimal(12, 2)
+  laborCost      Decimal  @db.Decimal(12, 2)
+  overheadCost   Decimal  @db.Decimal(12, 2)
+  totalCost      Decimal  @db.Decimal(12, 2)
+  marginTarget   Decimal  @db.Decimal(5, 4)
+  suggestedPrice Decimal  @db.Decimal(12, 2)
+  createdAt      DateTime @default(now())
+}
+
+enum PriceScope {
+  PROCEDURE_TYPE
+  GLOBAL
+}
+
+model PriceRule {
+  id                 String  @id @default(cuid())
+  scope              PriceScope
+  scopeId            String?
+  marginTarget       Decimal @db.Decimal(5, 4)
+  minMargin          Decimal @db.Decimal(5, 4)
+  maxMargin          Decimal @db.Decimal(5, 4)
+  dynamicAdjustments Json?
+}
+
+enum PaymentMethod {
+  PIX
+  CARD
+  BOLETO
+  CASH
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  procedure   Procedure @relation(fields: [procedureId], references: [id])
+  procedureId String
+  method      PaymentMethod
+  amount      Decimal  @db.Decimal(12, 2)
+  status      PaymentStatus @default(PENDING)
+  paidAt      DateTime?
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+  action    String
+  entity    String
+  entityId  String
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
+
+

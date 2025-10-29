@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proclinic - Sistema Original Completo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background: #f7fafc;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .nav-button.primary {
+            background: #4299e1;
+            color: white;
+        }
+        
+        .nav-button.primary:hover {
+            background: #3182ce;
+        }
+        
+        .nav-button.secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .nav-button.secondary:hover {
+            background: #cbd5e0;
+        }
+        
+        .nav-button.danger {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        .nav-button.danger:hover {
+            background: #c53030;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .success-banner {
+            background: #c6f6d5;
+            color: #2f855a;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #4299e1;
+        }
+        
+        .stat-card.patients {
+            border-left-color: #4299e1;
+        }
+        
+        .stat-card.items {
+            border-left-color: #38a169;
+        }
+        
+        .stat-card.procedures {
+            border-left-color: #9f7aea;
+        }
+        
+        .stat-card.revenue {
+            border-left-color: #ed8936;
+        }
+        
+        .stat-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+            margin-right: 0.75rem;
+        }
+        
+        .stat-title {
+            color: #4a5568;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            color: #2d3748;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-description {
+            color: #718096;
+            font-size: 0.8rem;
+        }
+        
+        .data-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            color: #2d3748;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .action-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .action-button.primary {
+            background: #4299e1;
+            color: white;
+        }
+        
+        .action-button.primary:hover {
+            background: #3182ce;
+        }
+        
+        .action-button.success {
+            background: #38a169;
+            color: white;
+        }
+        
+        .action-button.success:hover {
+            background: #2f855a;
+        }
+        
+        .action-button.warning {
+            background: #d69e2e;
+            color: white;
+        }
+        
+        .action-button.warning:hover {
+            background: #b7791f;
+        }
+        
+        .action-button.danger {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        .action-button.danger:hover {
+            background: #c53030;
+        }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        
+        .data-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #f7fafc;
+        }
+        
+        .data-item h4 {
+            color: #2d3748;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .data-item p {
+            color: #4a5568;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+        
+        .status-completed {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+        
+        .status-in-progress {
+            background: #fef5e7;
+            color: #d69e2e;
+        }
+        
+        .status-scheduled {
+            background: #bee3f8;
+            color: #2b6cb0;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #718096;
+        }
+        
+        .close-button:hover {
+            color: #2d3748;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4299e1;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            min-height: 500px;
+            margin: 2rem auto;
+        }
+        
+        .login-form {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .login-form h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .login-form p {
+            color: #718096;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+        
+        .login-button {
+            width: 100%;
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .login-button:hover {
+            background: #3182ce;
+        }
+        
+        .logo-section {
+            flex: 1;
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 40px;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        .logo h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .logo p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .data-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+            }
+            
+            .login-container {
+                flex-direction: column;
+                margin: 1rem;
+            }
+            
+            .logo-section {
+                order: -1;
+                padding: 20px;
+            }
+            
+            .login-form {
+                padding: 30px 20px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN SECTION -->
+    <div id="login-section">
+        <div class="login-container">
+            <div class="login-form">
+                <h1>Bem vindo</h1>
+                <p>Faça login com sua conta.</p>
+                
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username">Login</label>
+                        <input type="text" id="username" name="username" value="admin" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Senha</label>
+                        <input type="password" id="password" name="password" value="admin" required>
+                    </div>
+                    
+                    <button type="submit" class="login-button">
+                        Entrar
+                    </button>
+                </form>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <p style="color: #718096; font-size: 0.9rem;">
+                        Credenciais: admin / admin | admin123 / admin123 | teste / teste
+                    </p>
+                </div>
+            </div>
+            
+            <div class="logo-section">
+                <div class="logo">
+                    <h2>PROCLINIC</h2>
+                    <p>Medical Record</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD SECTION -->
+    <div id="dashboard-section" class="hidden">
+        <div class="header">
+            <h1>🏥 Proclinic - Sistema Completo</h1>
+            <div class="nav-buttons">
+                <button class="nav-button primary" onclick="showSection('dashboard')">Dashboard</button>
+                <button class="nav-button secondary" onclick="showSection('patients')">Pacientes</button>
+                <button class="nav-button secondary" onclick="showSection('items')">Itens</button>
+                <button class="nav-button secondary" onclick="showSection('procedures')">Procedimentos</button>
+                <button class="nav-button danger" onclick="logout()">Sair</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- DASHBOARD SECTION -->
+            <div id="dashboard-content">
+                <div class="success-banner">
+                    ✅ Sistema Proclinic funcionando perfeitamente! Login realizado com sucesso.
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card patients">
+                        <div class="stat-header">
+                            <span class="stat-icon">👥</span>
+                            <span class="stat-title">Pacientes</span>
+                        </div>
+                        <div class="stat-value" id="total-patients">0</div>
+                        <div class="stat-description">Pacientes cadastrados</div>
+                    </div>
+
+                    <div class="stat-card items">
+                        <div class="stat-header">
+                            <span class="stat-icon">📦</span>
+                            <span class="stat-title">Itens</span>
+                        </div>
+                        <div class="stat-value" id="total-items">0</div>
+                        <div class="stat-description">Itens em estoque</div>
+                    </div>
+
+                    <div class="stat-card procedures">
+                        <div class="stat-header">
+                            <span class="stat-icon">🏥</span>
+                            <span class="stat-title">Procedimentos</span>
+                        </div>
+                        <div class="stat-value" id="total-procedures">0</div>
+                        <div class="stat-description">Procedimentos realizados</div>
+                    </div>
+
+                    <div class="stat-card revenue">
+                        <div class="stat-header">
+                            <span class="stat-icon">💰</span>
+                            <span class="stat-title">Receita</span>
+                        </div>
+                        <div class="stat-value" id="total-revenue">R$ 0,00</div>
+                        <div class="stat-description">Receita total</div>
+                    </div>
+                </div>
+
+                <div class="data-section">
+                    <h2 class="section-title">👥 Pacientes Recentes</h2>
+                    <div class="data-grid" id="patients-grid">
+                        <!-- Dados serão carregados aqui -->
+                    </div>
+                </div>
+
+                <div class="data-section">
+                    <h2 class="section-title">📦 Itens em Estoque</h2>
+                    <div class="data-grid" id="items-grid">
+                        <!-- Dados serão carregados aqui -->
+                    </div>
+                </div>
+
+                <div class="data-section">
+                    <h2 class="section-title">🏥 Procedimentos Recentes</h2>
+                    <div class="data-grid" id="procedures-grid">
+                        <!-- Dados serão carregados aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PACIENTES SECTION -->
+            <div id="patients-content" class="hidden">
+                <div class="data-section">
+                    <div class="section-title">
+                        👥 Gerenciamento de Pacientes
+                        <div class="section-actions">
+                            <button class="action-button primary" onclick="openModal('patient')">+ Novo Paciente</button>
+                            <button class="action-button success" onclick="refreshData()">🔄 Atualizar</button>
+                        </div>
+                    </div>
+                    <div class="data-grid" id="patients-management-grid">
+                        <!-- Dados serão carregados aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ITENS SECTION -->
+            <div id="items-content" class="hidden">
+                <div class="data-section">
+                    <div class="section-title">
+                        📦 Gerenciamento de Itens
+                        <div class="section-actions">
+                            <button class="action-button primary" onclick="openModal('item')">+ Novo Item</button>
+                            <button class="action-button success" onclick="refreshData()">🔄 Atualizar</button>
+                        </div>
+                    </div>
+                    <div class="data-grid" id="items-management-grid">
+                        <!-- Dados serão carregados aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROCEDIMENTOS SECTION -->
+            <div id="procedures-content" class="hidden">
+                <div class="data-section">
+                    <div class="section-title">
+                        🏥 Gerenciamento de Procedimentos
+                        <div class="section-actions">
+                            <button class="action-button primary" onclick="openModal('procedure')">+ Novo Procedimento</button>
+                            <button class="action-button success" onclick="refreshData()">🔄 Atualizar</button>
+                        </div>
+                    </div>
+                    <div class="data-grid" id="procedures-management-grid">
+                        <!-- Dados serão carregados aqui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PARA CADASTRO -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Cadastrar</h2>
+                <button class="close-button" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <form id="modal-form">
+                <div id="modal-form-content">
+                    <!-- Conteúdo do formulário será inserido aqui -->
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="action-button secondary" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="action-button primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // DADOS MOCK COMPLETOS
+        const mockData = {
+            patients: [
+                {
+                    id: '1',
+                    name: 'João Silva',
+                    email: 'joao@email.com',
+                    phone: '(11) 99999-9999',
+                    birthDate: '1985-05-15',
+                    gender: 'M',
+                    address: 'Rua das Flores, 123',
+                    city: 'São Paulo',
+                    state: 'SP',
+                    cpf: '123.456.789-00',
+                    allergies: ['Penicilina', 'Dipirona'],
+                    medicalHistory: ['Hipertensão', 'Diabetes tipo 2']
+                },
+                {
+                    id: '2',
+                    name: 'Maria Santos',
+                    email: 'maria@email.com',
+                    phone: '(11) 88888-8888',
+                    birthDate: '1990-08-20',
+                    gender: 'F',
+                    address: 'Av. Paulista, 456',
+                    city: 'São Paulo',
+                    state: 'SP',
+                    cpf: '987.654.321-00',
+                    allergies: ['Iodo'],
+                    medicalHistory: ['Asma']
+                }
+            ],
+            items: [
+                {
+                    id: '1',
+                    name: 'Seringa 5ml',
+                    description: 'Seringa descartável 5ml',
+                    category: 'Material Médico',
+                    currentStock: 100,
+                    minStock: 20,
+                    costPrice: 2.50,
+                    salePrice: 5.00,
+                    averagePrice: 2.50
+                },
+                {
+                    id: '2',
+                    name: 'Algodão',
+                    description: 'Algodão hidrófilo',
+                    category: 'Material Médico',
+                    currentStock: 50,
+                    minStock: 10,
+                    costPrice: 15.00,
+                    salePrice: 30.00,
+                    averagePrice: 15.00
+                }
+            ],
+            procedures: [
+                {
+                    id: '1',
+                    patientName: 'João Silva',
+                    type: 'Consulta',
+                    description: 'Consulta de rotina',
+                    status: 'completed',
+                    price: 200.00,
+                    date: '2024-01-15'
+                },
+                {
+                    id: '2',
+                    patientName: 'Maria Santos',
+                    type: 'Exame',
+                    description: 'Exame de sangue',
+                    status: 'in_progress',
+                    price: 120.00,
+                    date: '2024-01-16'
+                }
+            ]
+        };
+
+        let currentSection = 'dashboard';
+        let currentModal = '';
+
+        // FUNÇÃO PARA FAZER LOGIN
+        function handleLogin(username, password) {
+            console.log('🚀 Tentando login:', username, password);
+            
+            // Credenciais válidas
+            const validCredentials = [
+                { username: 'admin', password: 'admin' },
+                { username: 'admin123', password: 'admin123' },
+                { username: 'teste', password: 'teste' }
+            ];
+            
+            // Verificar credenciais
+            const isValid = validCredentials.some(cred => 
+                cred.username === username && cred.password === password
+            );
+            
+            if (isValid) {
+                console.log('✅ Login válido!');
+                
+                // Salvar dados de autenticação
+                const authData = {
+                    isAuthenticated: true,
+                    user: {
+                        id: 'admin-id',
+                        name: 'Administrador',
+                        email: username,
+                        role: 'gestor'
+                    },
+                    token: 'token-' + Date.now(),
+                    loginTime: new Date().toISOString()
+                };
+                
+                localStorage.setItem('proclinic-auth', JSON.stringify(authData));
+                
+                // Inicializar dados mock
+                initializeMockData();
+                
+                // Mostrar dashboard
+                showDashboard();
+                
+                return true;
+            } else {
+                console.log('❌ Credenciais inválidas');
+                alert('❌ Login ou senha inválidos. Use: admin / admin');
+                return false;
+            }
+        }
+
+        // Função para inicializar dados mock
+        function initializeMockData() {
+            console.log('🚀 Inicializando dados mock...');
+            
+            // Salvar dados no localStorage
+            localStorage.setItem('proclinic-patients', JSON.stringify(mockData.patients));
+            localStorage.setItem('proclinic-items', JSON.stringify(mockData.items));
+            localStorage.setItem('proclinic-procedures', JSON.stringify(mockData.procedures));
+            
+            console.log('✅ Dados mock inicializados!');
+        }
+
+        // Função para mostrar dashboard
+        function showDashboard() {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.remove('hidden');
+            
+            // Carregar dados
+            loadData();
+        }
+
+        // Função para mostrar seção
+        function showSection(section) {
+            // Esconder todas as seções
+            document.getElementById('dashboard-content').classList.add('hidden');
+            document.getElementById('patients-content').classList.add('hidden');
+            document.getElementById('items-content').classList.add('hidden');
+            document.getElementById('procedures-content').classList.add('hidden');
+            
+            // Mostrar seção selecionada
+            if (section === 'dashboard') {
+                document.getElementById('dashboard-content').classList.remove('hidden');
+                loadData();
+            } else if (section === 'patients') {
+                document.getElementById('patients-content').classList.remove('hidden');
+                loadPatientsManagement();
+            } else if (section === 'items') {
+                document.getElementById('items-content').classList.remove('hidden');
+                loadItemsManagement();
+            } else if (section === 'procedures') {
+                document.getElementById('procedures-content').classList.remove('hidden');
+                loadProceduresManagement();
+            }
+            
+            currentSection = section;
+        }
+
+        // Função para carregar dados
+        function loadData() {
+            console.log('📊 Carregando dados do dashboard...');
+            
+            // Carregar dados do localStorage
+            const patients = JSON.parse(localStorage.getItem('proclinic-patients') || '[]');
+            const items = JSON.parse(localStorage.getItem('proclinic-items') || '[]');
+            const procedures = JSON.parse(localStorage.getItem('proclinic-procedures') || '[]');
+            
+            // Atualizar estatísticas
+            document.getElementById('total-patients').textContent = patients.length;
+            document.getElementById('total-items').textContent = items.length;
+            document.getElementById('total-procedures').textContent = procedures.length;
+            
+            // Calcular receita total
+            const totalRevenue = procedures.reduce((sum, proc) => sum + (proc.price || 0), 0);
+            document.getElementById('total-revenue').textContent = `R$ ${totalRevenue.toFixed(2)}`;
+            
+            // Carregar dados dos pacientes
+            const patientsGrid = document.getElementById('patients-grid');
+            patientsGrid.innerHTML = patients.slice(0, 4).map(patient => `
+                <div class="data-item">
+                    <h4>${patient.name}</h4>
+                    <p><strong>Email:</strong> ${patient.email}</p>
+                    <p><strong>Telefone:</strong> ${patient.phone}</p>
+                    <p><strong>Endereço:</strong> ${patient.address}, ${patient.city} - ${patient.state}</p>
+                    <p><strong>CPF:</strong> ${patient.cpf}</p>
+                </div>
+            `).join('');
+            
+            // Carregar dados dos itens
+            const itemsGrid = document.getElementById('items-grid');
+            itemsGrid.innerHTML = items.slice(0, 4).map(item => `
+                <div class="data-item">
+                    <h4>${item.name}</h4>
+                    <p><strong>Descrição:</strong> ${item.description}</p>
+                    <p><strong>Categoria:</strong> ${item.category}</p>
+                    <p><strong>Estoque:</strong> ${item.currentStock} unidades</p>
+                    <p><strong>Preço:</strong> R$ ${item.salePrice.toFixed(2)}</p>
+                </div>
+            `).join('');
+            
+            // Carregar dados dos procedimentos
+            const proceduresGrid = document.getElementById('procedures-grid');
+            proceduresGrid.innerHTML = procedures.slice(0, 4).map(procedure => `
+                <div class="data-item">
+                    <h4>${procedure.description}</h4>
+                    <p><strong>Paciente:</strong> ${procedure.patientName}</p>
+                    <p><strong>Tipo:</strong> ${procedure.type}</p>
+                    <p><strong>Valor:</strong> R$ ${procedure.price.toFixed(2)}</p>
+                    <span class="status-badge status-${procedure.status}">
+                        ${procedure.status === 'completed' ? 'Concluído' : 
+                          procedure.status === 'in_progress' ? 'Em Andamento' : 'Agendado'}
+                    </span>
+                </div>
+            `).join('');
+            
+            console.log('✅ Dados carregados com sucesso!');
+        }
+
+        // Função para carregar gerenciamento de pacientes
+        function loadPatientsManagement() {
+            const patients = JSON.parse(localStorage.getItem('proclinic-patients') || '[]');
+            const patientsGrid = document.getElementById('patients-management-grid');
+            
+            patientsGrid.innerHTML = patients.map(patient => `
+                <div class="data-item">
+                    <h4>${patient.name}</h4>
+                    <p><strong>Email:</strong> ${patient.email}</p>
+                    <p><strong>Telefone:</strong> ${patient.phone}</p>
+                    <p><strong>CPF:</strong> ${patient.cpf}</p>
+                    <p><strong>Alergias:</strong> ${patient.allergies.join(', ') || 'Nenhuma'}</p>
+                    <div style="margin-top: 10px;">
+                        <button class="action-button warning" onclick="editPatient('${patient.id}')">Editar</button>
+                        <button class="action-button danger" onclick="deletePatient('${patient.id}')">Excluir</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Função para carregar gerenciamento de itens
+        function loadItemsManagement() {
+            const items = JSON.parse(localStorage.getItem('proclinic-items') || '[]');
+            const itemsGrid = document.getElementById('items-management-grid');
+            
+            itemsGrid.innerHTML = items.map(item => `
+                <div class="data-item">
+                    <h4>${item.name}</h4>
+                    <p><strong>Descrição:</strong> ${item.description}</p>
+                    <p><strong>Categoria:</strong> ${item.category}</p>
+                    <p><strong>Estoque:</strong> ${item.currentStock} unidades</p>
+                    <p><strong>Estoque Mínimo:</strong> ${item.minStock} unidades</p>
+                    <p><strong>Preço de Custo:</strong> R$ ${item.costPrice.toFixed(2)}</p>
+                    <p><strong>Preço de Venda:</strong> R$ ${item.salePrice.toFixed(2)}</p>
+                    <p><strong>Preço Médio:</strong> R$ ${item.averagePrice.toFixed(2)}</p>
+                    <div style="margin-top: 10px;">
+                        <button class="action-button warning" onclick="editItem('${item.id}')">Editar</button>
+                        <button class="action-button danger" onclick="deleteItem('${item.id}')">Excluir</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Função para carregar gerenciamento de procedimentos
+        function loadProceduresManagement() {
+            const procedures = JSON.parse(localStorage.getItem('proclinic-procedures') || '[]');
+            const proceduresGrid = document.getElementById('procedures-management-grid');
+            
+            proceduresGrid.innerHTML = procedures.map(procedure => `
+                <div class="data-item">
+                    <h4>${procedure.description}</h4>
+                    <p><strong>Paciente:</strong> ${procedure.patientName}</p>
+                    <p><strong>Tipo:</strong> ${procedure.type}</p>
+                    <p><strong>Valor:</strong> R$ ${procedure.price.toFixed(2)}</p>
+                    <p><strong>Data:</strong> ${procedure.date}</p>
+                    <span class="status-badge status-${procedure.status}">
+                        ${procedure.status === 'completed' ? 'Concluído' : 
+                          procedure.status === 'in_progress' ? 'Em Andamento' : 'Agendado'}
+                    </span>
+                    <div style="margin-top: 10px;">
+                        <button class="action-button warning" onclick="editProcedure('${procedure.id}')">Editar</button>
+                        <button class="action-button danger" onclick="deleteProcedure('${procedure.id}')">Excluir</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Função para abrir modal
+        function openModal(type) {
+            currentModal = type;
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalFormContent = document.getElementById('modal-form-content');
+            
+            if (type === 'patient') {
+                modalTitle.textContent = 'Cadastrar Paciente';
+                modalFormContent.innerHTML = `
+                    <div class="form-group">
+                        <label>Nome Completo</label>
+                        <input type="text" id="patient-name" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="patient-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Telefone</label>
+                            <input type="text" id="patient-phone" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Data de Nascimento</label>
+                            <input type="date" id="patient-birth" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Sexo</label>
+                            <select id="patient-gender" required>
+                                <option value="M">Masculino</option>
+                                <option value="F">Feminino</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Endereço</label>
+                        <input type="text" id="patient-address" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Cidade</label>
+                            <input type="text" id="patient-city" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Estado</label>
+                            <input type="text" id="patient-state" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>CPF</label>
+                        <input type="text" id="patient-cpf" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Alergias (separadas por vírgula)</label>
+                        <input type="text" id="patient-allergies">
+                    </div>
+                    <div class="form-group">
+                        <label>Histórico Médico (separado por vírgula)</label>
+                        <input type="text" id="patient-history">
+                    </div>
+                `;
+            } else if (type === 'item') {
+                modalTitle.textContent = 'Cadastrar Item';
+                modalFormContent.innerHTML = `
+                    <div class="form-group">
+                        <label>Nome do Item</label>
+                        <input type="text" id="item-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <input type="text" id="item-description" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoria</label>
+                        <input type="text" id="item-category" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Estoque Atual</label>
+                            <input type="number" id="item-stock" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Estoque Mínimo</label>
+                            <input type="number" id="item-min-stock" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Preço de Custo</label>
+                            <input type="number" step="0.01" id="item-cost-price" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Preço de Venda</label>
+                            <input type="number" step="0.01" id="item-sale-price" required>
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'procedure') {
+                modalTitle.textContent = 'Cadastrar Procedimento';
+                modalFormContent.innerHTML = `
+                    <div class="form-group">
+                        <label>Paciente</label>
+                        <select id="procedure-patient" required>
+                            <option value="">Selecione um paciente</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Procedimento</label>
+                        <input type="text" id="procedure-type" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <input type="text" id="procedure-description" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Valor</label>
+                            <input type="number" step="0.01" id="procedure-price" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Data</label>
+                            <input type="date" id="procedure-date" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="procedure-status" required>
+                            <option value="scheduled">Agendado</option>
+                            <option value="in_progress">Em Andamento</option>
+                            <option value="completed">Concluído</option>
+                        </select>
+                    </div>
+                `;
+                
+                // Carregar pacientes para o select
+                const patients = JSON.parse(localStorage.getItem('proclinic-patients') || '[]');
+                const patientSelect = document.getElementById('procedure-patient');
+                patientSelect.innerHTML = '<option value="">Selecione um paciente</option>' +
+                    patients.map(patient => `<option value="${patient.id}">${patient.name}</option>`).join('');
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        // Função para fechar modal
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            currentModal = '';
+        }
+
+        // Função para salvar dados do modal
+        function saveModalData() {
+            if (currentModal === 'patient') {
+                const patient = {
+                    id: Date.now().toString(),
+                    name: document.getElementById('patient-name').value,
+                    email: document.getElementById('patient-email').value,
+                    phone: document.getElementById('patient-phone').value,
+                    birthDate: document.getElementById('patient-birth').value,
+                    gender: document.getElementById('patient-gender').value,
+                    address: document.getElementById('patient-address').value,
+                    city: document.getElementById('patient-city').value,
+                    state: document.getElementById('patient-state').value,
+                    cpf: document.getElementById('patient-cpf').value,
+                    allergies: document.getElementById('patient-allergies').value.split(',').map(a => a.trim()).filter(a => a),
+                    medicalHistory: document.getElementById('patient-history').value.split(',').map(h => h.trim()).filter(h => h)
+                };
+                
+                const patients = JSON.parse(localStorage.getItem('proclinic-patients') || '[]');
+                patients.push(patient);
+                localStorage.setItem('proclinic-patients', JSON.stringify(patients));
+                
+                alert('✅ Paciente cadastrado com sucesso!');
+                loadPatientsManagement();
+                
+            } else if (currentModal === 'item') {
+                const item = {
+                    id: Date.now().toString(),
+                    name: document.getElementById('item-name').value,
+                    description: document.getElementById('item-description').value,
+                    category: document.getElementById('item-category').value,
+                    currentStock: parseInt(document.getElementById('item-stock').value),
+                    minStock: parseInt(document.getElementById('item-min-stock').value),
+                    costPrice: parseFloat(document.getElementById('item-cost-price').value),
+                    salePrice: parseFloat(document.getElementById('item-sale-price').value),
+                    averagePrice: parseFloat(document.getElementById('item-cost-price').value)
+                };
+                
+                const items = JSON.parse(localStorage.getItem('proclinic-items') || '[]');
+                items.push(item);
+                localStorage.setItem('proclinic-items', JSON.stringify(items));
+                
+                alert('✅ Item cadastrado com sucesso!');
+                loadItemsManagement();
+                
+            } else if (currentModal === 'procedure') {
+                const patients = JSON.parse(localStorage.getItem('proclinic-patients') || '[]');
+                const selectedPatient = patients.find(p => p.id === document.getElementById('procedure-patient').value);
+                
+                const procedure = {
+                    id: Date.now().toString(),
+                    patientName: selectedPatient ? selectedPatient.name : 'Paciente não encontrado',
+                    type: document.getElementById('procedure-type').value,
+                    description: document.getElementById('procedure-description').value,
+                    price: parseFloat(document.getElementById('procedure-price').value),
+                    date: document.getElementById('procedure-date').value,
+                    status: document.getElementById('procedure-status').value
+                };
+                
+                const procedures = JSON.parse(localStorage.getItem('proclinic-procedures') || '[]');
+                procedures.push(procedure);
+                localStorage.setItem('proclinic-procedures', JSON.stringify(procedures));
+                
+                alert('✅ Procedimento cadastrado com sucesso!');
+                loadProceduresManagement();
+            }
+            
+            closeModal();
+        }
+
+        // Função para atualizar dados
+        function refreshData() {
+            console.log('🔄 Atualizando dados...');
+            if (currentSection === 'dashboard') {
+                loadData();
+            } else if (currentSection === 'patients') {
+                loadPatientsManagement();
+            } else if (currentSection === 'items') {
+                loadItemsManagement();
+            } else if (currentSection === 'procedures') {
+                loadProceduresManagement();
+            }
+            alert('✅ Dados atualizados com sucesso!');
+        }
+
+        // Função para logout
+        function logout() {
+            localStorage.removeItem('proclinic-auth');
+            alert('👋 Logout realizado com sucesso!');
+            window.location.href = 'SISTEMA_ORIGINAL_COMPLETO.html';
+        }
+
+        // Event listener para o formulário de login
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            handleLogin(username, password);
+        });
+
+        // Event listener para o formulário do modal
+        document.getElementById('modal-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveModalData();
+        });
+
+        // Verificar se já está logado
+        window.onload = function() {
+            const authData = localStorage.getItem('proclinic-auth');
+            if (authData) {
+                try {
+                    const parsed = JSON.parse(authData);
+                    if (parsed.isAuthenticated) {
+                        console.log('✅ Usuário já logado, redirecionando...');
+                        showDashboard();
+                    }
+                } catch (e) {
+                    console.log('❌ Erro ao verificar auth:', e);
+                }
+            }
+        };
+    </script>
+</body>
+</html>
+
+
+
+

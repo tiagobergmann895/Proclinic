@@ -1,0 +1,168 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../common/prisma.service';
+
+@Injectable()
+export class ReportsService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async profitability(from?: string, to?: string, groupBy?: 'procedureType' | 'professional') {
+    const where: any = {};
+    if (from || to) {
+      where.finishedAt = { gte: from ? new Date(from) : undefined, lte: to ? new Date(to) : undefined };
+    }
+    const procedures = await this.prisma.procedure.findMany({ where, include: { costSheet: true, procedureType: true, professional: true } });
+    const map = new Map<string, { totalRevenue: number; totalCost: number; count: number; label: string }>();
+    for (const p of procedures) {
+      const key = groupBy === 'professional' ? p.professionalUserId : p.procedureTypeId;
+      const label = groupBy === 'professional' ? p.professional.name : p.procedureType.name;
+      const rec = map.get(key) || { totalRevenue: 0, totalCost: 0, count: 0, label };
+      const paid = await this.prisma.payment.aggregate({ _sum: { amount: true }, where: { procedureId: p.id } });
+      rec.totalRevenue += Number(paid._sum.amount || 0);
+      rec.totalCost += Number(p.costSheet?.totalCost || 0);
+      rec.count += 1;
+      map.set(key, rec);
+    }
+    return Array.from(map.entries()).map(([id, v]) => ({ id, label: v.label, totalRevenue: v.totalRevenue, totalCost: v.totalCost, profit: v.totalRevenue - v.totalCost, margin: v.totalRevenue ? (v.totalRevenue - v.totalCost) / v.totalRevenue : 0, count: v.count }));
+  }
+
+  async stockAlerts() {
+    const items = await this.prisma.item.findMany({ include: { batches: true } });
+    const alerts: any[] = [];
+    const now = new Date();
+    const soon = new Date(now.getTime() + 30 * 24 * 3600 * 1000);
+    for (const it of items) {
+      const total = it.batches.reduce((acc, b) => acc + Number(b.quantityAvailable), 0);
+      if (total < it.minStock) alerts.push({ type: 'MIN_STOCK', itemId: it.id, name: it.name, total });
+      for (const b of it.batches) {
+        if (b.expirationDate && b.expirationDate <= soon) {
+          alerts.push({ type: 'EXPIRING', itemId: it.id, name: it.name, batchId: b.id, batchCode: b.batchCode, expirationDate: b.expirationDate });
+        }
+      }
+    }
+    return alerts;
+  }
+
+  async getTotalRevenue(from?: string, to?: string) {
+    const where: any = {};
+    if (from || to) {
+      where.createdAt = { 
+        gte: from ? new Date(from) : undefined, 
+        lte: to ? new Date(to) : undefined 
+      };
+    }
+
+    const payments = await this.prisma.payment.aggregate({
+      _sum: { amount: true },
+      _count: true,
+      where: { ...where, status: 'COMPLETED' }
+    });
+
+    return {
+      totalRevenue: Number(payments._sum.amount || 0),
+      totalPayments: payments._count,
+      period: { from, to }
+    };
+  }
+
+  async getProceduresSummary(from?: string, to?: string) {
+    const where: any = {};
+    if (from || to) {
+      where.scheduledAt = { 
+        gte: from ? new Date(from) : undefined, 
+        lte: to ? new Date(to) : undefined 
+      };
+    }
+
+    const procedures = await this.prisma.procedure.groupBy({
+      by: ['status'],
+      _count: true,
+      where
+    });
+
+    const total = await this.prisma.procedure.count({ where });
+
+    return {
+      total,
+      byStatus: procedures.map(p => ({
+        status: p.status,
+        count: p._count
+      })),
+      period: { from, to }
+    };
+  }
+
+  async getTopProcedures(from?: string, to?: string, limit: number = 10) {
+    const where: any = {};
+    if (from || to) {
+      where.scheduledAt = { 
+        gte: from ? new Date(from) : undefined, 
+        lte: to ? new Date(to) : undefined 
+      };
+    }
+
+    const procedures = await this.prisma.procedure.groupBy({
+      by: ['procedureTypeId'],
+      _count: true,
+      where,
+      orderBy: { _count: { procedureTypeId: 'desc' } },
+      take: limit
+    });
+
+    const enriched = await Promise.all(
+      procedures.map(async (p) => {
+        const procedureType = await this.prisma.procedureType.findUnique({
+          where: { id: p.procedureTypeId }
+        });
+        return {
+          procedureTypeId: p.procedureTypeId,
+          procedureTypeName: procedureType?.name || 'Unknown',
+          count: p._count
+        };
+      })
+    );
+
+    return {
+      topProcedures: enriched,
+      period: { from, to }
+    };
+  }
+
+  async getInventoryValue() {
+    const batches = await this.prisma.itemBatch.findMany({
+      where: { quantityAvailable: { gt: 0 } },
+      include: { item: true }
+    });
+
+    let totalValue = 0;
+    let totalItems = 0;
+
+    const itemsValue = batches.map(batch => {
+      const batchValue = Number(batch.quantityAvailable) * Number(batch.unitCost);
+      totalValue += batchValue;
+      totalItems += Number(batch.quantityAvailable);
+      
+      return {
+        itemId: batch.itemId,
+        itemName: batch.item.name,
+        batchCode: batch.batchCode,
+        quantity: Number(batch.quantityAvailable),
+        unitCost: Number(batch.unitCost),
+        totalValue: batchValue
+      };
+    });
+
+    return {
+      totalValue: Math.round(totalValue * 100) / 100,
+      totalItems,
+      itemsCount: batches.length,
+      items: itemsValue
+    };
+  }
+}
+
+
+
+
+
+
+

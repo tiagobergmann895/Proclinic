@@ -1,0 +1,1059 @@
+// ============================================================================
+// PROCLINIC - PRONTUÁRIO ELETRÔNICO DO PACIENTE (PEP)
+// Modelagem de Dados - PostgreSQL via Prisma
+// Padrão: HL7 FHIR R4 quando aplicável
+// Compliance: LGPD, CFM 1.821/2007 (Prontuário Digital)
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// MULTI-TENANCY E ORGANIZAÇÃO
+// ============================================================================
+
+model Tenant {
+  id                String   @id @default(uuid())
+  name              String
+  cnpj              String   @unique
+  domain            String?  @unique
+  settings          Json     @default("{}")
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  // Retenção de dados (LGPD)
+  dataRetentionDays Int      @default(2555) // ~7 anos (CFM)
+  
+  // Relações
+  users             User[]
+  patients          Patient[]
+  encounters        Encounter[]
+  clinicalNotes     ClinicalNote[]
+  prescriptions     Prescription[]
+  diagnosticReports DiagnosticReport[]
+  documentReferences DocumentReference[]
+  auditLogs         AuditLog[]
+  
+  @@map("tenants")
+}
+
+// ============================================================================
+// USUÁRIOS E CONTROLE DE ACESSO (RBAC + ABAC)
+// ============================================================================
+
+enum UserRole {
+  SUPER_ADMIN       // Administrador do sistema
+  ADMIN_CLINICA     // Administrador da clínica/tenant
+  MEDICO            // Médico
+  DENTISTA          // Dentista
+  PSICOLOGO         // Psicólogo
+  ENFERMEIRO        // Enfermeiro
+  RECEPCAO          // Recepcionista
+  FINANCEIRO        // Financeiro
+  AUDITOR           // Auditor (apenas leitura)
+}
+
+model User {
+  id                String   @id @default(uuid())
+  tenantId          String
+  tenant            Tenant   @relation(fields: [tenantId], references: [id])
+  
+  email             String   @unique
+  password          String   // Argon2 hash
+  name              String
+  role              UserRole
+  
+  // Profissional de saúde
+  professionalId    String?  @unique // CRM, CRO, CRP, COREN, etc.
+  professionalCouncil String? // Conselho (CRM, CRO, etc.)
+  professionalUF    String?  // UF do registro
+  specialty         String?  // Especialidade
+  
+  // Segurança
+  isActive          Boolean  @default(true)
+  mfaEnabled        Boolean  @default(false)
+  mfaSecret         String?  // TOTP secret
+  lastLoginAt       DateTime?
+  failedLoginAttempts Int    @default(0)
+  
+  // Configurações
+  settings          Json     @default("{}")
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  // Relações
+  encounters        Encounter[]
+  clinicalNotes     ClinicalNote[]
+  prescriptions     Prescription[]
+  observations      Observation[]
+  auditLogs         AuditLog[]
+  accessPolicies    AccessPolicy[]
+  
+  @@index([tenantId])
+  @@index([email])
+  @@map("users")
+}
+
+// Políticas de acesso granular (ABAC)
+model AccessPolicy {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  
+  resourceType  String   // Patient, Encounter, ClinicalNote, etc.
+  resourceId    String?  // ID específico (ou null para todos)
+  action        String   // read, write, delete, export
+  
+  // Condições
+  condition     Json?    // Ex: {"department": "cardiology"}
+  
+  expiresAt     DateTime?
+  createdAt     DateTime @default(now())
+  
+  @@index([userId, resourceType])
+  @@map("access_policies")
+}
+
+// ============================================================================
+// PACIENTE (FHIR Patient)
+// ============================================================================
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  UNKNOWN
+}
+
+model Patient {
+  id                String   @id @default(uuid())
+  tenantId          String
+  tenant            Tenant   @relation(fields: [tenantId], references: [id])
+  
+  // Dados demográficos
+  name              String
+  birthDate         DateTime?
+  gender            Gender?
+  
+  // Documentos
+  cpf               String?  @unique
+  cns               String?  // Cartão Nacional de Saúde
+  rg                String?
+  
+  // Contato
+  phone             String?
+  email             String?
+  address           Json?    // FHIR Address structure
+  
+  // Clínicos
+  bloodType         String?  // A+, B-, O+, etc.
+  photo             String?  // URL
+  
+  // Responsável/Contato de Emergência
+  emergencyContact  Json?    // {name, relationship, phone}
+  
+  // Status
+  isActive          Boolean  @default(true)
+  isDeceased        Boolean  @default(false)
+  deceasedAt        DateTime?
+  
+  // LGPD
+  consentedAt       DateTime?
+  consentVersion    String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  // Relações
+  encounters        Encounter[]
+  conditions        Condition[]
+  allergies         AllergyIntolerance[]
+  medications       MedicationStatement[]
+  immunizations     Immunization[]
+  observations      Observation[]
+  clinicalNotes     ClinicalNote[]
+  prescriptions     Prescription[]
+  diagnosticReports DiagnosticReport[]
+  documents         DocumentReference[]
+  consents          Consent[]
+  carePlans         CarePlan[]
+  
+  @@index([tenantId])
+  @@index([cpf])
+  @@index([cns])
+  @@map("patients")
+}
+
+// ============================================================================
+// ENCOUNTER (Consulta/Atendimento - FHIR Encounter)
+// ============================================================================
+
+enum EncounterStatus {
+  PLANNED
+  ARRIVED
+  TRIAGED
+  IN_PROGRESS
+  FINISHED
+  CANCELLED
+}
+
+enum EncounterClass {
+  AMBULATORY      // Ambulatório
+  EMERGENCY       // Emergência
+  INPATIENT       // Internação
+  HOME            // Domiciliar
+  VIRTUAL         // Telemedicina
+}
+
+model Encounter {
+  id                String          @id @default(uuid())
+  tenantId          String
+  tenant            Tenant          @relation(fields: [tenantId], references: [id])
+  
+  patientId         String
+  patient           Patient         @relation(fields: [patientId], references: [id])
+  
+  practitionerId    String
+  practitioner      User            @relation(fields: [practitionerId], references: [id])
+  
+  // Classificação
+  class             EncounterClass
+  status            EncounterStatus @default(PLANNED)
+  
+  // Timing
+  scheduledStart    DateTime
+  scheduledEnd      DateTime?
+  actualStart       DateTime?
+  actualEnd         DateTime?
+  
+  // Local
+  location          String?
+  room              String?
+  
+  // Tipo/Especialidade
+  serviceType       String?         // Cardiologia, Psicologia, etc.
+  
+  // Motivo
+  reasonCode        String?         // Código (CID-10, etc.)
+  reasonDisplay     String?         // Texto livre
+  
+  // Prioridade
+  priority          String?         // routine, urgent, emergency
+  
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  
+  // Relações
+  clinicalNotes     ClinicalNote[]
+  observations      Observation[]
+  prescriptions     Prescription[]
+  diagnosticReports DiagnosticReport[]
+  procedures        ClinicalProcedure[]
+  
+  @@index([tenantId])
+  @@index([patientId])
+  @@index([practitionerId])
+  @@index([scheduledStart])
+  @@map("encounters")
+}
+
+// ============================================================================
+// EVOLUÇÃO CLÍNICA / SOAP NOTES (FHIR DocumentReference + Composition)
+// ============================================================================
+
+enum NoteType {
+  SOAP           // Subjective, Objective, Assessment, Plan
+  PROGRESS       // Evolução
+  ADMISSION      // Admissão
+  DISCHARGE      // Alta
+  CONSULT        // Parecer/Interconsulta
+  PROCEDURE      // Descrição de procedimento
+}
+
+enum NoteStatus {
+  DRAFT
+  FINAL
+  AMENDED
+  ENTERED_IN_ERROR
+}
+
+model ClinicalNote {
+  id                String      @id @default(uuid())
+  tenantId          String
+  tenant            Tenant      @relation(fields: [tenantId], references: [id])
+  
+  patientId         String
+  patient           Patient     @relation(fields: [patientId], references: [id])
+  
+  encounterId       String?
+  encounter         Encounter?  @relation(fields: [encounterId], references: [id])
+  
+  authorId          String
+  author            User        @relation(fields: [authorId], references: [id])
+  
+  // Tipo e Status
+  type              NoteType
+  status            NoteStatus  @default(DRAFT)
+  
+  // SOAP Structure (JSON)
+  subjective        String?     @db.Text // Queixa, sintomas relatados
+  objective         String?     @db.Text // Exame físico, dados objetivos
+  assessment        String?     @db.Text // Avaliação, diagnóstico
+  plan              String?     @db.Text // Plano terapêutico, condutas
+  
+  // Metadados
+  title             String?
+  summary           String?     @db.Text
+  
+  // Versionamento
+  version           Int         @default(1)
+  parentNoteId      String?
+  parentNote        ClinicalNote? @relation("NoteVersions", fields: [parentNoteId], references: [id])
+  versions          ClinicalNote[] @relation("NoteVersions")
+  
+  // Assinatura Digital
+  signedAt          DateTime?
+  signatureHash     String?     // Hash da nota assinada
+  
+  // Timestamps
+  documentDate      DateTime    @default(now())
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  
+  @@index([tenantId])
+  @@index([patientId])
+  @@index([encounterId])
+  @@index([authorId])
+  @@index([documentDate])
+  @@map("clinical_notes")
+}
+
+// ============================================================================
+// CONDIÇÕES/PROBLEMAS (FHIR Condition)
+// ============================================================================
+
+enum ConditionClinicalStatus {
+  ACTIVE
+  RECURRENCE
+  RELAPSE
+  INACTIVE
+  REMISSION
+  RESOLVED
+}
+
+enum ConditionVerificationStatus {
+  UNCONFIRMED
+  PROVISIONAL
+  DIFFERENTIAL
+  CONFIRMED
+  REFUTED
+  ENTERED_IN_ERROR
+}
+
+model Condition {
+  id                    String                       @id @default(uuid())
+  patientId             String
+  patient               Patient                      @relation(fields: [patientId], references: [id])
+  
+  // Codificação (CID-10, SNOMED-CT)
+  code                  String?                      // Ex: I10 (CID-10)
+  codeSystem            String?                      // Ex: ICD-10, SNOMED-CT
+  display               String                       // Texto do diagnóstico
+  
+  // Status
+  clinicalStatus        ConditionClinicalStatus
+  verificationStatus    ConditionVerificationStatus?
+  
+  // Datas
+  onsetDateTime         DateTime?                    // Início
+  abatementDateTime     DateTime?                    // Resolução
+  recordedDate          DateTime                     @default(now())
+  
+  // Gravidade
+  severity              String?                      // mild, moderate, severe
+  
+  // Notas
+  notes                 String?                      @db.Text
+  
+  // Quem registrou
+  recorderId            String?
+  
+  createdAt             DateTime                     @default(now())
+  updatedAt             DateTime                     @updatedAt
+  
+  @@index([patientId])
+  @@index([clinicalStatus])
+  @@map("conditions")
+}
+
+// ============================================================================
+// ALERGIAS E INTOLERÂNCIAS (FHIR AllergyIntolerance)
+// ============================================================================
+
+enum AllergyCategory {
+  FOOD
+  MEDICATION
+  ENVIRONMENT
+  BIOLOGIC
+}
+
+enum AllergyCriticality {
+  LOW
+  HIGH
+  UNABLE_TO_ASSESS
+}
+
+enum AllergyType {
+  ALLERGY
+  INTOLERANCE
+}
+
+model AllergyIntolerance {
+  id                String            @id @default(uuid())
+  patientId         String
+  patient           Patient           @relation(fields: [patientId], references: [id])
+  
+  // Codificação
+  code              String?           // RxNorm, SNOMED-CT
+  codeSystem        String?
+  display           String            // Descrição da alergia
+  
+  // Classificação
+  category          AllergyCategory
+  type              AllergyType?
+  criticality       AllergyCriticality
+  
+  // Reações
+  reactions         Json?             // Array de {manifestation, severity, onset}
+  
+  // Status
+  clinicalStatus    String            @default("active") // active, inactive, resolved
+  verificationStatus String           @default("confirmed")
+  
+  // Datas
+  onsetDateTime     DateTime?
+  recordedDate      DateTime          @default(now())
+  
+  // Notas
+  notes             String?           @db.Text
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([patientId])
+  @@index([category])
+  @@map("allergy_intolerances")
+}
+
+// ============================================================================
+// MEDICAMENTOS (FHIR MedicationStatement)
+// ============================================================================
+
+enum MedicationStatus {
+  ACTIVE
+  COMPLETED
+  ENTERED_IN_ERROR
+  INTENDED
+  STOPPED
+  ON_HOLD
+}
+
+model MedicationStatement {
+  id                String            @id @default(uuid())
+  patientId         String
+  patient           Patient           @relation(fields: [patientId], references: [id])
+  
+  // Medicamento
+  medicationCode    String?           // RxNorm, ANVISA
+  medicationDisplay String            // Nome do medicamento
+  
+  // Status
+  status            MedicationStatus
+  
+  // Posologia
+  dosage            Json?             // {dose, frequency, route, timing}
+  // Ex: {"dose": "500mg", "frequency": "2x ao dia", "route": "oral", "duration": "7 dias"}
+  
+  // Período
+  effectiveStart    DateTime?
+  effectiveEnd      DateTime?
+  
+  // Indicação
+  reasonCode        String?
+  reasonDisplay     String?
+  
+  // Quem prescreveu
+  prescriberId      String?
+  
+  // Notas
+  notes             String?           @db.Text
+  
+  recordedDate      DateTime          @default(now())
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([patientId])
+  @@index([status])
+  @@map("medication_statements")
+}
+
+// ============================================================================
+// IMUNIZAÇÕES (FHIR Immunization)
+// ============================================================================
+
+enum ImmunizationStatus {
+  COMPLETED
+  ENTERED_IN_ERROR
+  NOT_DONE
+}
+
+model Immunization {
+  id                String              @id @default(uuid())
+  patientId         String
+  patient           Patient             @relation(fields: [patientId], references: [id])
+  
+  // Vacina
+  vaccineCode       String?             // CVX code
+  vaccineDisplay    String              // Nome da vacina
+  
+  // Status
+  status            ImmunizationStatus
+  statusReason      String?             // Se NOT_DONE, motivo
+  
+  // Aplicação
+  occurrenceDate    DateTime
+  lotNumber         String?
+  expirationDate    DateTime?
+  manufacturer      String?
+  
+  // Dose
+  doseQuantity      Float?
+  doseUnit          String?
+  
+  // Local e via
+  site              String?             // Braço direito, coxa, etc.
+  route             String?             // Intramuscular, subcutânea, etc.
+  
+  // Quem aplicou
+  performerId       String?
+  
+  // Notas
+  notes             String?             @db.Text
+  
+  recordedDate      DateTime            @default(now())
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  @@index([patientId])
+  @@index([occurrenceDate])
+  @@map("immunizations")
+}
+
+// ============================================================================
+// OBSERVAÇÕES / SINAIS VITAIS (FHIR Observation)
+// ============================================================================
+
+enum ObservationStatus {
+  REGISTERED
+  PRELIMINARY
+  FINAL
+  AMENDED
+  CORRECTED
+  CANCELLED
+  ENTERED_IN_ERROR
+}
+
+model Observation {
+  id                String            @id @default(uuid())
+  patientId         String
+  patient           Patient           @relation(fields: [patientId], references: [id])
+  
+  encounterId       String?
+  
+  performerId       String?
+  performer         User?             @relation(fields: [performerId], references: [id])
+  
+  // Tipo de observação (LOINC)
+  code              String            // Ex: 8310-5 (temperatura), 8867-4 (freq. cardíaca)
+  codeSystem        String            @default("http://loinc.org")
+  display           String            // Descrição legível
+  
+  // Categoria
+  category          String?           // vital-signs, laboratory, exam, etc.
+  
+  // Valor
+  valueQuantity     Float?
+  valueUnit         String?
+  valueString       String?
+  valueBoolean      Boolean?
+  valueCodeableConcept Json?
+  
+  // Referência
+  referenceRangeLow  Float?
+  referenceRangeHigh Float?
+  
+  // Interpretação
+  interpretation    String?           // normal, high, low, critical
+  
+  // Status
+  status            ObservationStatus @default(FINAL)
+  
+  // Timing
+  effectiveDateTime DateTime          @default(now())
+  issued            DateTime          @default(now())
+  
+  // Notas
+  notes             String?           @db.Text
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([patientId])
+  @@index([encounterId])
+  @@index([code])
+  @@index([category])
+  @@index([effectiveDateTime])
+  @@map("observations")
+}
+
+// ============================================================================
+// PRESCRIÇÕES (FHIR MedicationRequest)
+// ============================================================================
+
+enum PrescriptionStatus {
+  DRAFT
+  ACTIVE
+  ON_HOLD
+  CANCELLED
+  COMPLETED
+  ENTERED_IN_ERROR
+  STOPPED
+}
+
+model Prescription {
+  id                String              @id @default(uuid())
+  tenantId          String
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  
+  patientId         String
+  patient           Patient             @relation(fields: [patientId], references: [id])
+  
+  encounterId       String?
+  encounter         Encounter?          @relation(fields: [encounterId], references: [id])
+  
+  prescriberId      String
+  prescriber        User                @relation(fields: [prescriberId], references: [id])
+  
+  // Status
+  status            PrescriptionStatus  @default(DRAFT)
+  
+  // Itens prescritos
+  items             Json                // Array de medicamentos com posologia
+  // Ex: [{"medication": "Amoxicilina 500mg", "dosage": "1 cp 8/8h", "duration": "7 dias"}]
+  
+  // Validade
+  validUntil        DateTime?
+  
+  // Assinatura Digital
+  signedAt          DateTime?
+  signatureData     String?             // Certificado digital
+  
+  // PDF gerado
+  pdfUrl            String?
+  
+  // Notas
+  notes             String?             @db.Text
+  
+  authoredOn        DateTime            @default(now())
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  @@index([tenantId])
+  @@index([patientId])
+  @@index([encounterId])
+  @@index([prescriberId])
+  @@map("prescriptions")
+}
+
+// ============================================================================
+// EXAMES / RELATÓRIOS DIAGNÓSTICOS (FHIR DiagnosticReport)
+// ============================================================================
+
+enum DiagnosticReportStatus {
+  REGISTERED
+  PARTIAL
+  PRELIMINARY
+  FINAL
+  AMENDED
+  CORRECTED
+  APPENDED
+  CANCELLED
+  ENTERED_IN_ERROR
+}
+
+model DiagnosticReport {
+  id                String                  @id @default(uuid())
+  tenantId          String
+  tenant            Tenant                  @relation(fields: [tenantId], references: [id])
+  
+  patientId         String
+  patient           Patient                 @relation(fields: [patientId], references: [id])
+  
+  encounterId       String?
+  encounter         Encounter?              @relation(fields: [encounterId], references: [id])
+  
+  // Tipo de exame
+  code              String                  // LOINC
+  codeSystem        String                  @default("http://loinc.org")
+  display           String                  // Nome do exame
+  category          String?                 // LAB, RAD, etc.
+  
+  // Status
+  status            DiagnosticReportStatus
+  
+  // Resultados
+  conclusion        String?                 @db.Text
+  conclusionCode    String?                 // Codificado
+  
+  // Arquivos anexos
+  attachments       Json?                   // URLs de PDFs, imagens
+  
+  // Responsável
+  performerId       String?
+  
+  // Timing
+  effectiveDateTime DateTime?
+  issued            DateTime                @default(now())
+  
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  
+  @@index([tenantId])
+  @@index([patientId])
+  @@index([encounterId])
+  @@index([status])
+  @@map("diagnostic_reports")
+}
+
+// ============================================================================
+// PROCEDIMENTOS CLÍNICOS (FHIR Procedure)
+// ============================================================================
+
+enum ProcedureStatus {
+  PREPARATION
+  IN_PROGRESS
+  NOT_DONE
+  ON_HOLD
+  STOPPED
+  COMPLETED
+  ENTERED_IN_ERROR
+}
+
+model ClinicalProcedure {
+  id                String          @id @default(uuid())
+  patientId         String
+  
+  encounterId       String?
+  encounter         Encounter?      @relation(fields: [encounterId], references: [id])
+  
+  // Procedimento
+  code              String?         // TUSS, CIAP-2
+  codeSystem        String?
+  display           String          // Descrição
+  
+  // Status
+  status            ProcedureStatus
+  statusReason      String?
+  
+  // Timing
+  performedStart    DateTime?
+  performedEnd      DateTime?
+  
+  // Responsável
+  performerId       String?
+  
+  // Notas
+  notes             String?         @db.Text
+  
+  recordedDate      DateTime        @default(now())
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  
+  @@index([patientId])
+  @@index([encounterId])
+  @@map("clinical_procedures")
+}
+
+// ============================================================================
+// DOCUMENTOS E ANEXOS (FHIR DocumentReference)
+// ============================================================================
+
+enum DocumentStatus {
+  CURRENT
+  SUPERSEDED
+  ENTERED_IN_ERROR
+}
+
+enum DocumentType {
+  EXAM_RESULT       // Resultado de exame
+  MEDICAL_REPORT    // Relatório médico
+  IMAGE             // Imagem (RX, TC, RM)
+  CONSENT_FORM      // Termo de consentimento
+  PRESCRIPTION      // Receita
+  REFERRAL          // Encaminhamento
+  OTHER             // Outros
+}
+
+model DocumentReference {
+  id                String          @id @default(uuid())
+  tenantId          String
+  tenant            Tenant          @relation(fields: [tenantId], references: [id])
+  
+  patientId         String
+  patient           Patient         @relation(fields: [patientId], references: [id])
+  
+  encounterId       String?
+  
+  // Tipo de documento
+  type              DocumentType
+  category          String?
+  
+  // Status
+  status            DocumentStatus   @default(CURRENT)
+  
+  // Arquivo
+  fileName          String
+  mimeType          String
+  fileSize          Int              // bytes
+  fileUrl           String           // S3/storage URL
+  fileHash          String?          // SHA-256 para integridade
+  
+  // Metadados
+  title             String?
+  description       String?          @db.Text
+  
+  // Autor/Origem
+  authorId          String?
+  authorName        String?
+  
+  // Data do documento
+  documentDate      DateTime
+  
+  // Versão
+  version           Int              @default(1)
+  supersedes        String?          // ID do documento anterior
+  
+  // Acesso
+  accessLevel       String           @default("private") // private, team, public
+  
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  
+  @@index([tenantId])
+  @@index([patientId])
+  @@index([type])
+  @@index([documentDate])
+  @@map("document_references")
+}
+
+// ============================================================================
+// CONSENTIMENTOS (FHIR Consent)
+// ============================================================================
+
+enum ConsentStatus {
+  DRAFT
+  PROPOSED
+  ACTIVE
+  REJECTED
+  INACTIVE
+  ENTERED_IN_ERROR
+}
+
+model Consent {
+  id                String        @id @default(uuid())
+  patientId         String
+  patient           Patient       @relation(fields: [patientId], references: [id])
+  
+  // Tipo de consentimento
+  scope             String        // patient-privacy, research, treatment
+  category          String        // LGPD: data-sharing, marketing, etc.
+  
+  // Status
+  status            ConsentStatus
+  
+  // Conteúdo
+  policyRule        String?       // URL da política
+  provision         Json?         // Regras de permissão/negação
+  
+  // Assinatura
+  signedAt          DateTime?
+  signatureData     String?       // Base64 ou URL
+  witnessId         String?       // Testemunha
+  
+  // Validade
+  validFrom         DateTime      @default(now())
+  validUntil        DateTime?
+  
+  // Documento
+  documentUrl       String?       // PDF assinado
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  @@index([patientId])
+  @@index([status])
+  @@map("consents")
+}
+
+// ============================================================================
+// PLANO DE CUIDADO (FHIR CarePlan)
+// ============================================================================
+
+enum CarePlanStatus {
+  DRAFT
+  ACTIVE
+  ON_HOLD
+  REVOKED
+  COMPLETED
+  ENTERED_IN_ERROR
+}
+
+model CarePlan {
+  id                String          @id @default(uuid())
+  patientId         String
+  patient           Patient         @relation(fields: [patientId], references: [id])
+  
+  // Status
+  status            CarePlanStatus
+  intent            String          @default("plan") // proposal, plan, order
+  
+  // Título e descrição
+  title             String
+  description       String?         @db.Text
+  
+  // Período
+  periodStart       DateTime
+  periodEnd         DateTime?
+  
+  // Atividades/Tarefas
+  activities        Json            // Array de atividades
+  // Ex: [{"activity": "Retorno em 30 dias", "status": "scheduled", "scheduledDate": "2024-02-20"}]
+  
+  // Objetivos
+  goals             Json?
+  
+  // Equipe
+  careTeam          Json?           // Array de profissionais
+  
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  
+  @@index([patientId])
+  @@index([status])
+  @@map("care_plans")
+}
+
+// ============================================================================
+// AUDITORIA (Compliance LGPD + Rastreabilidade)
+// ============================================================================
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  EXPORT
+  PRINT
+  SHARE
+  LOGIN
+  LOGOUT
+  ACCESS_DENIED
+  BREAK_THE_GLASS  // Acesso de emergência
+}
+
+model AuditLog {
+  id                String      @id @default(uuid())
+  tenantId          String
+  tenant            Tenant      @relation(fields: [tenantId], references: [id])
+  
+  // Quem
+  userId            String?
+  user              User?       @relation(fields: [userId], references: [id])
+  userName          String?     // Snapshot do nome
+  userRole          String?
+  
+  // O quê
+  action            AuditAction
+  resourceType      String      // Patient, ClinicalNote, etc.
+  resourceId        String?
+  
+  // Detalhes
+  description       String?
+  changes           Json?       // Diff before/after
+  
+  // Contexto
+  ipAddress         String?
+  userAgent         String?
+  
+  // LGPD: Finalidade do acesso
+  accessPurpose     String?     // treatment, audit, research, emergency
+  justification     String?     // Para break-the-glass
+  
+  // Hash para integridade (append-only log)
+  previousHash      String?
+  currentHash       String      // SHA-256 de (previousHash + timestamp + data)
+  
+  timestamp         DateTime    @default(now())
+  
+  @@index([tenantId])
+  @@index([userId])
+  @@index([resourceType, resourceId])
+  @@index([timestamp])
+  @@index([action])
+  @@map("audit_logs")
+}
+
+// ============================================================================
+// CATÁLOGOS E TABELAS DE REFERÊNCIA
+// ============================================================================
+
+// Unidades de medida para observações
+model UnitOfMeasure {
+  id          String   @id @default(uuid())
+  code        String   @unique // Ex: cm, kg, mmHg
+  display     String
+  system      String?  // UCUM
+  
+  @@map("units_of_measure")
+}
+
+// Códigos de vacinas (CVX)
+model VaccineCode {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  display     String
+  manufacturer String?
+  
+  @@map("vaccine_codes")
+}
+
+// Vias de administração
+model RouteOfAdministration {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  display     String
+  
+  @@map("routes_of_administration")
+}
+
+
+
+

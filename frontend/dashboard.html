@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proclinic - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-50">
+        <!-- Header -->
+        <div class="bg-white shadow">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-6">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-bold text-gray-900">Proclinic</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-700" id="user-name">
+                            Carregando...
+                        </span>
+                        <button
+                            onclick="logout()"
+                            class="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700"
+                        >
+                            Sair
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <div class="px-4 py-6 sm:px-0">
+                <!-- Success Message -->
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+                    <strong>✅ Sistema Proclinic Funcionando Perfeitamente!</strong>
+                    <p class="mt-2">Login realizado com sucesso usando dados locais.</p>
+                </div>
+
+                <!-- Dashboard Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">
+                                            Pacientes
+                                        </dt>
+                                        <dd class="text-lg font-medium text-gray-900" id="patients-count">
+                                            3
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    </svg>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">
+                                            Itens em Estoque
+                                        </dt>
+                                        <dd class="text-lg font-medium text-gray-900" id="items-count">
+                                            3
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">
+                                            Procedimentos
+                                        </dt>
+                                        <dd class="text-lg font-medium text-gray-900" id="procedures-count">
+                                            3
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Menu -->
+                <div class="bg-white shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                            Menu do Sistema
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <button onclick="showPatients()" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700">
+                                👥 Pacientes
+                            </button>
+                            <button onclick="showItems()" class="bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700">
+                                📦 Itens
+                            </button>
+                            <button onclick="showProcedures()" class="bg-purple-600 text-white px-4 py-2 rounded-md text-sm hover:bg-purple-700">
+                                🏥 Procedimentos
+                            </button>
+                            <button onclick="showInventory()" class="bg-yellow-600 text-white px-4 py-2 rounded-md text-sm hover:bg-yellow-700">
+                                📊 Estoque
+                            </button>
+                            <button onclick="showReports()" class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm hover:bg-indigo-700">
+                                📈 Relatórios
+                            </button>
+                            <button onclick="showSettings()" class="bg-gray-600 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-700">
+                                ⚙️ Configurações
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Display -->
+                <div id="data-display" class="mt-8">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            localStorage.removeItem('proclinic-auth-local');
+            window.location.href = 'login-simples.html';
+        }
+
+        function showPatients() {
+            const patients = JSON.parse(localStorage.getItem('proclinic-patients-local') || '[]');
+            const html = `
+                <div class="bg-white shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                            👥 Pacientes Cadastrados
+                        </h3>
+                        <div class="space-y-4">
+                            ${patients.map(patient => `
+                                <div class="border rounded-lg p-4">
+                                    <h4 class="font-medium text-gray-900">${patient.name}</h4>
+                                    <p class="text-sm text-gray-600">${patient.email}</p>
+                                    <p class="text-sm text-gray-600">${patient.phone}</p>
+                                    <p class="text-sm text-gray-600">${patient.address}, ${patient.city} - ${patient.state}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('data-display').innerHTML = html;
+        }
+
+        function showItems() {
+            const items = JSON.parse(localStorage.getItem('proclinic-items-local') || '[]');
+            const html = `
+                <div class="bg-white shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                            📦 Itens em Estoque
+                        </h3>
+                        <div class="space-y-4">
+                            ${items.map(item => `
+                                <div class="border rounded-lg p-4">
+                                    <h4 class="font-medium text-gray-900">${item.name}</h4>
+                                    <p class="text-sm text-gray-600">${item.description}</p>
+                                    <p class="text-sm text-gray-600">Estoque: ${item.currentStock} ${item.unit}</p>
+                                    <p class="text-sm text-gray-600">Preço: R$ ${item.salePrice.toFixed(2)}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('data-display').innerHTML = html;
+        }
+
+        function showProcedures() {
+            const html = `
+                <div class="bg-white shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                            🏥 Procedimentos
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="border rounded-lg p-4">
+                                <h4 class="font-medium text-gray-900">Consulta de Rotina</h4>
+                                <p class="text-sm text-gray-600">Paciente: João Silva</p>
+                                <p class="text-sm text-gray-600">Status: Concluído</p>
+                                <p class="text-sm text-gray-600">Valor: R$ 200,00</p>
+                            </div>
+                            <div class="border rounded-lg p-4">
+                                <h4 class="font-medium text-gray-900">Exame de Sangue</h4>
+                                <p class="text-sm text-gray-600">Paciente: Maria Santos</p>
+                                <p class="text-sm text-gray-600">Status: Em Andamento</p>
+                                <p class="text-sm text-gray-600">Valor: R$ 120,00</p>
+                            </div>
+                            <div class="border rounded-lg p-4">
+                                <h4 class="font-medium text-gray-900">Curativo</h4>
+                                <p class="text-sm text-gray-600">Paciente: Pedro Costa</p>
+                                <p class="text-sm text-gray-600">Status: Agendado</p>
+                                <p class="text-sm text-gray-600">Valor: R$ 80,00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('data-display').innerHTML = html;
+        }
+
+        function showInventory() {
+            const items = JSON.parse(localStorage.getItem('proclinic-items-local') || '[]');
+            const html = `
+                <div class="bg-white shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                            📊 Controle de Estoque
+                        </h3>
+                        <div class="space-y-4">
+                            ${items.map(item => `
+                                <div class="border rounded-lg p-4">
+                                    <h4 class="font-medium text-gray-900">${item.name}</h4>
+                                    <p class="text-sm text-gray-600">Estoque Atual: ${item.currentStock} ${item.unit}</p>
+                                    <p class="text-sm text-gray-600">Estoque Mínimo: ${item.minStock} ${item.unit}</p>
+                                    <p class="text-sm text-gray-600">Estoque Máximo: ${item.maxStock} ${item.unit}</p>
+                                    <div class="mt-2">
+                                        <div class="bg-gray-200 rounded-full h-2">
+                                            <div class="bg-${item.currentStock < item.minStock ? 'red' : item.currentStock > item.maxStock ? 'yellow' : 'green'}-500 h-2 rounded-full" style="width: ${(item.currentStock / item.maxStock) * 100}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('data-display').innerHTML = html;
+        }
+
+        function showReports() {
+            const html = `
+                <div class="bg-white shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                            📈 Relatórios
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="border rounded-lg p-4">
+                                <h4 class="font-medium text-gray-900">Receita Total</h4>
+                                <p class="text-2xl font-bold text-green-600">R$ 400,00</p>
+                            </div>
+                            <div class="border rounded-lg p-4">
+                                <h4 class="font-medium text-gray-900">Pacientes Atendidos</h4>
+                                <p class="text-2xl font-bold text-blue-600">3</p>
+                            </div>
+                            <div class="border rounded-lg p-4">
+                                <h4 class="font-medium text-gray-900">Procedimentos Realizados</h4>
+                                <p class="text-2xl font-bold text-purple-600">3</p>
+                            </div>
+                            <div class="border rounded-lg p-4">
+                                <h4 class="font-medium text-gray-900">Itens em Estoque</h4>
+                                <p class="text-2xl font-bold text-yellow-600">3</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('data-display').innerHTML = html;
+        }
+
+        function showSettings() {
+            const html = `
+                <div class="bg-white shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                            ⚙️ Configurações do Sistema
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="border rounded-lg p-4">
+                                <h4 class="font-medium text-gray-900">Informações do Sistema</h4>
+                                <p class="text-sm text-gray-600">Versão: 1.0.0</p>
+                                <p class="text-sm text-gray-600">Modo: Local</p>
+                                <p class="text-sm text-gray-600">Último Login: ${new Date().toLocaleString()}</p>
+                            </div>
+                            <div class="border rounded-lg p-4">
+                                <h4 class="font-medium text-gray-900">Dados Locais</h4>
+                                <p class="text-sm text-gray-600">Pacientes: 3 cadastrados</p>
+                                <p class="text-sm text-gray-600">Itens: 3 cadastrados</p>
+                                <p class="text-sm text-gray-600">Procedimentos: 3 cadastrados</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('data-display').innerHTML = html;
+        }
+
+        // Verificar autenticação ao carregar
+        window.onload = function() {
+            const authData = localStorage.getItem('proclinic-auth-local');
+            if (!authData) {
+                window.location.href = 'login-simples.html';
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(authData);
+                if (!parsed.isAuthenticated) {
+                    window.location.href = 'login-simples.html';
+                    return;
+                }
+
+                // Mostrar nome do usuário
+                document.getElementById('user-name').textContent = `Olá, ${parsed.user.name}`;
+
+                // Carregar dados iniciais
+                showPatients();
+            } catch (e) {
+                console.log('❌ Erro ao verificar auth:', e);
+                window.location.href = 'login-simples.html';
+            }
+        };
+    </script>
+</body>
+</html>
