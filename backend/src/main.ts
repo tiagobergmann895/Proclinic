@@ -3,12 +3,11 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 const cookieParser = require('cookie-parser');
-import { AppModule } from './modules/app.module';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-  // Configure CORS for production
   app.enableCors({
     origin: [
       'http://localhost:5173',
@@ -38,11 +37,8 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  // eslint-disable-next-line no-console
   console.log(`Backend running on http://localhost:${port} (Swagger /api)`);
 }
 
 bootstrap();
-
-
 
