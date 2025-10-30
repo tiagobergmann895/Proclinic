@@ -15,5 +15,5 @@
     "types": ["node"]
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "frontend", "backend"]
+  "exclude": ["node_modules", "dist", "frontend", "backend", "src/modules/ehr.disabled"]
 }
