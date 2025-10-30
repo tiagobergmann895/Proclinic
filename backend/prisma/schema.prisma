@@ -39,6 +39,15 @@ model Patient {
   notes           String?
   createdAt       DateTime @default(now())
   procedures      Procedure[]
+  
+  conditions         Condition[]
+  allergies          AllergyIntolerance[]
+  medications        Prescription[]
+  immunizations      Immunization[]
+  clinicalNotes      ClinicalNote[]
+  observations       Observation[]
+  diagnosticReports  DiagnosticReport[]
+  documentReferences DocumentReference[]
 }
 
 model Supplier {
@@ -186,12 +195,122 @@ model AuditLog {
   id        String   @id @default(cuid())
   user      User?    @relation(fields: [userId], references: [id])
   userId    String?
+  userName  String?
+  userRole  String?
   action    String
   entity    String
   entityId  String
   metadata  Json?
   createdAt DateTime @default(now())
+  
+  tenantId     String?
+  resourceType String?
+  resourceId   String?
+  description  String?
+  changes      Json?
+  ipAddress    String?
+  userAgent    String?
+  accessPurpose String?
+  justification String?
+  previousHash String?
+  currentHash  String?
+  timestamp    DateTime @default(now())
+  
+  @@index([tenantId])
+  @@index([entityId])
 }
 
+model ClinicalNote {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  content   String   @db.Text
+  authorId  String
+  signed    Boolean  @default(false)
+  signedAt  DateTime?
+  
+  @@index([patientId])
+}
 
+model Observation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  code      String
+  value     String
+  unit      String?
+  
+  @@index([patientId])
+}
 
+model Prescription {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  medication String
+  dosage    String
+  frequency String
+  
+  @@index([patientId])
+}
+
+model DiagnosticReport {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  code      String
+  result    String   @db.Text
+  
+  @@index([patientId])
+}
+
+model AllergyIntolerance {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  allergen  String
+  reaction  String?
+  severity  String?
+  
+  @@index([patientId])
+}
+
+model DocumentReference {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  title     String
+  url       String
+  type      String
+  
+  @@index([patientId])
+}
+
+model Condition {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  code      String
+  name      String
+  status    String
+  
+  @@index([patientId])
+}
+
+model Immunization {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  vaccine   String
+  date      DateTime
+  
+  @@index([patientId])
+}
