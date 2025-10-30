@@ -11,13 +11,11 @@
     "outDir": "dist",
     "baseUrl": "./",
     "incremental": true,
-    "strict": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["node"]
   },
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "frontend", "backend", "src/modules/ehr.disabled"]
 }
-
 
 
