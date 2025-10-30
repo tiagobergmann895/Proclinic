@@ -16,7 +16,7 @@ export class SubscriptionsService {
       console.warn('STRIPE_SECRET_KEY not configured');
     }
     this.stripe = new Stripe(stripeSecretKey || 'sk_test_dummy', {
-      apiVersion: '2025-09-30.clover',
+      apiVersion: '2023-10-16',
     });
   }
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma.service';
-import { Prisma, QueryMode } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PatientsService {
@@ -10,7 +10,7 @@ export class PatientsService {
     const where: any = query.q
       ? {
           OR: [
-            { name: { contains: query.q, mode: QueryMode.insensitive } },
+            { name: { contains: query.q, mode: 'insensitive' } },
             { document: { contains: query.q } },
             { phone: { contains: query.q } },
           ],
