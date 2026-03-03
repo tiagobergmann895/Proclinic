@@ -1,0 +1,19 @@
+﻿node.exe : Retrieving projectÔÇª
+No linha:1 caractere:1
++ & "C:\Program 
+Files\nodejs/node.exe" "C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpe 
+   cified: (Retrieving projectÔÇª:S  
+  tring) [], RemoteException
+    + FullyQualifiedErrorId : Native 
+   CommandError
+ 
+Error: The provided path 
+ÔÇ£~\Documents\Proclinic\frontendÔÇØ 
+does not exist. To change your 
+Project Settings, go to https://verce
+l.com/tiagos-projects-f6a7279d/procli
+nic/settings
