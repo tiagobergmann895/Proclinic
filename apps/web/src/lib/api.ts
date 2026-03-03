@@ -2,7 +2,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 export const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+    baseURL: process.env.NEXT_PUBLIC_API_URL ?? 'https://proclinic-backend.onrender.com',
 });
 
 // Adiciona o token JWT em todas as requisições se ele existir
