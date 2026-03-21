@@ -16,6 +16,7 @@ export class AuthService {
             console.log('Tentando login para:', email);
             const user = await this.prisma.user.findUnique({
                 where: { email },
+                include: { memberships: true },
             });
 
             if (!user) {
@@ -32,7 +33,8 @@ export class AuthService {
             }
 
             console.log('Senha correta. Gerando token...');
-            const payload = { sub: user.id, email: user.email };
+            const roles = user.memberships?.map(m => m.role) || [];
+            const payload = { sub: user.id, email: user.email, roles };
             return {
                 access_token: await this.jwtService.signAsync(payload),
             };

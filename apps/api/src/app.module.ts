@@ -3,10 +3,20 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { PatientModule } from './patient/patient.module';
+import { AppointmentModule } from './appointment/appointment.module';
+import { ClinicalRecordModule } from './clinical-record/clinical-record.module';
+import { InvoiceModule } from './invoice/invoice.module';
+import { TransactionModule } from './transaction/transaction.module';
+import { ProductModule } from './product/product.module';
+import { StockMovementModule } from './stock-movement/stock-movement.module';
+import { BiModule } from './bi/bi.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule],
+  imports: [AuthModule, PrismaModule, PatientModule, AppointmentModule, ClinicalRecordModule, InvoiceModule, TransactionModule, ProductModule, StockMovementModule, BiModule],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule { }
+
+
