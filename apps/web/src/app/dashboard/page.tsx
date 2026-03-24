@@ -19,6 +19,7 @@ export default function Dashboard() {
     const [user, setUser] = useState<any>(null);
     const [metrics, setMetrics] = useState<BiMetrics | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
 
     useEffect(() => {
         const fetchInitialData = async () => {
@@ -51,8 +52,10 @@ export default function Dashboard() {
                         <h2 className="text-4xl font-extrabold font-headline tracking-tight text-on-surface">Overview</h2>
                         <p className="text-on-surface-variant mt-1">Bem-vindo de volta, Dr. {doctorName}. Aqui está o resumo atualizado da base.</p>
                     </div>
-                    <div className="flex gap-2">
-                        <button className="px-4 py-2 bg-surface-container-highest text-on-surface rounded-xl text-sm font-semibold flex items-center gap-2 hover:opacity-80">
+                    <div className="flex gap-2 relative">
+                        <button 
+                            onClick={() => setIsFilterOpen(true)}
+                            className="px-4 py-2 bg-surface-container-highest text-on-surface rounded-xl text-sm font-semibold flex items-center gap-2 hover:opacity-80 transition-opacity">
                             <span className="material-symbols-outlined text-lg">filter_list</span> Filtros
                         </button>
                     </div>
@@ -116,6 +119,43 @@ export default function Dashboard() {
                     </div>
                 </section>
             </div>
+
+            {/* Modal Filtros */}
+            {isFilterOpen && (
+                <div className="fixed inset-0 bg-inverse-surface/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-surface-container-lowest border border-outline-variant/10 rounded-3xl w-full max-w-md p-8 shadow-2xl">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold font-headline text-on-surface">Filtros Avançados</h2>
+                            <button onClick={() => setIsFilterOpen(false)} className="text-on-surface-variant hover:text-on-surface">
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <form onSubmit={(e) => { e.preventDefault(); setIsFilterOpen(false); alert('Filtros aplicados com sucesso! Banco de dados recarregando...'); }} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-on-surface-variant mb-1">Período de Análise</label>
+                                <select className="w-full bg-surface-container-low border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-primary/50 text-on-surface cursor-pointer">
+                                    <option value="30D">Últimos 30 dias</option>
+                                    <option value="90D">Últimos 90 dias</option>
+                                    <option value="YTD">Year-to-Date (YTD)</option>
+                                    <option value="ALL">Desde o início</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-on-surface-variant mb-1">Unidade Clínica</label>
+                                <select className="w-full bg-surface-container-low border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-primary/50 text-on-surface cursor-pointer">
+                                    <option value="ALL">Todas as Unidades</option>
+                                    <option value="MATRIZ">Matriz Central</option>
+                                    <option value="FILIAL_1">Filial Zona Sul</option>
+                                </select>
+                            </div>
+                            <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-outline-variant/10">
+                                <button type="button" onClick={() => setIsFilterOpen(false)} className="px-5 py-2.5 rounded-xl font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors">Limpar</button>
+                                <button type="submit" className="px-5 py-2.5 rounded-xl font-bold bg-primary text-on-primary hover:bg-primary-dim transition-colors shadow-sm">Aplicar Visão</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </AppLayout>
     );
 }

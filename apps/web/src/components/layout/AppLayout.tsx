@@ -38,17 +38,19 @@ export function AppLayout({ children, userProfile, currentRoute, onLogout }: App
                 
                 <nav className="flex-1 px-4 flex flex-col gap-1 mt-2">
                     {renderNav('/dashboard', 'grid_view', 'Dashboard', 'dashboard')}
+                    {renderNav('/bi', 'monitoring', 'BI & Analytics', 'bi')}
                     {renderNav('/appointments', 'calendar_month', 'Appointments', 'appointments')}
+                    {renderNav('/patients', 'group', 'Pacientes', 'patients')}
                     {renderNav('/records', 'medical_information', 'EHR Records', 'records')}
                     {renderNav('/finance', 'payments', 'Financials', 'finance')}
-                    {renderNav('/settings', 'settings', 'Settings', 'settings')}
+                    {renderNav('/inventory', 'inventory', 'Inventory', 'inventory')}
                 </nav>
 
                 <div className="p-6 mt-auto">
-                    <button className="w-full bg-[#005bc1] hover:bg-blue-700 text-white font-semibold font-headline py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-md transition-colors focus:outline-none focus:ring-4 focus:ring-blue-100">
+                    <a href="/appointments" className="w-full bg-[#005bc1] hover:bg-blue-700 text-white font-semibold font-headline py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-md transition-colors focus:outline-none focus:ring-4 focus:ring-blue-100">
                         <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>add_circle</span>
                         <span>New Appointment</span>
-                    </button>
+                    </a>
                     
                     {/* Logout Hidden Trigger for functionality */}
                     <button onClick={onLogout} className="w-full mt-4 text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors">
@@ -74,11 +76,11 @@ export function AppLayout({ children, userProfile, currentRoute, onLogout }: App
                         
                         {/* Profile & Actions */}
                         <div className="flex items-center gap-7 mt-2">
-                            <button className="text-slate-500 hover:text-slate-800 transition-colors relative">
+                            <button onClick={() => alert('Sem novas notificações no momento.')} className="text-slate-500 hover:text-slate-800 transition-colors relative">
                                 <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>notifications</span>
                                 <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                             </button>
-                            <button className="text-slate-500 hover:text-slate-800 transition-colors">
+                            <button onClick={() => alert('Central de Ajuda indisponível. Entre em contato com o suporte remoto.')} className="text-slate-500 hover:text-slate-800 transition-colors">
                                 <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>help</span>
                             </button>
                             

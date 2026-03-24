@@ -16,6 +16,12 @@ export default function Appointments() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({ date: '', time: '', patientId: '', professionalId: '', type: 'CONSULTATION', duration: 30 });
 
+    const [currentView, setCurrentView] = useState('Week');
+    const [isAllDoctors, setIsAllDoctors] = useState(true);
+    const [isExamRooms, setIsExamRooms] = useState(false);
+    const [weekOffset, setWeekOffset] = useState(0);
+    const [selectedAppointment, setSelectedAppointment] = useState<{name: string, type: string, time: string} | null>(null);
+
     useEffect(() => {
         if (!user) return;
         const fetchInitialData = async () => {
@@ -72,27 +78,27 @@ export default function Appointments() {
                     <div>
                         <h2 className="text-[32px] font-extrabold font-headline tracking-[-0.03em] text-slate-800">Weekly Agenda</h2>
                         <div className="flex items-center gap-4 mt-2 text-slate-800 font-semibold">
-                            <button className="text-slate-400 hover:text-slate-600 transition-colors"><span className="material-symbols-outlined text-sm">arrow_back_ios</span></button>
-                            <span className="text-sm">October 23 — 29, 2023</span>
-                            <button className="text-slate-400 hover:text-slate-600 transition-colors"><span className="material-symbols-outlined text-sm">arrow_forward_ios</span></button>
+                            <button onClick={() => setWeekOffset(weekOffset - 1)} className="text-slate-400 hover:text-slate-600 transition-colors"><span className="material-symbols-outlined text-sm">arrow_back_ios</span></button>
+                            <span className="text-sm">October {23 + (weekOffset * 7)} — {29 + (weekOffset * 7)}, 2023</span>
+                            <button onClick={() => setWeekOffset(weekOffset + 1)} className="text-slate-400 hover:text-slate-600 transition-colors"><span className="material-symbols-outlined text-sm">arrow_forward_ios</span></button>
                         </div>
                     </div>
                     
                     <div className="flex items-center gap-4">
                         <div className="flex items-center bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
-                            <button className="px-5 py-2 text-sm font-bold text-[#005bc1] bg-blue-50/50 rounded-lg">Week</button>
-                            <button className="px-5 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700">Day</button>
-                            <button className="px-5 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700">Month</button>
+                            <button onClick={() => setCurrentView('Week')} className={`px-5 py-2 text-sm font-semibold rounded-lg ${currentView === 'Week' ? 'font-bold text-[#005bc1] bg-blue-50/50' : 'text-slate-500 hover:text-slate-700'}`}>Week</button>
+                            <button onClick={() => setCurrentView('Day')} className={`px-5 py-2 text-sm font-semibold rounded-lg ${currentView === 'Day' ? 'font-bold text-[#005bc1] bg-blue-50/50' : 'text-slate-500 hover:text-slate-700'}`}>Day</button>
+                            <button onClick={() => setCurrentView('Month')} className={`px-5 py-2 text-sm font-semibold rounded-lg ${currentView === 'Month' ? 'font-bold text-[#005bc1] bg-blue-50/50' : 'text-slate-500 hover:text-slate-700'}`}>Month</button>
                         </div>
                         
-                        <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 transition-colors">
-                            <span className="material-symbols-outlined text-slate-500 text-[18px]">filter_list</span>
-                            <span className="text-sm font-bold text-slate-700">All Doctors</span>
+                        <button onClick={() => setIsAllDoctors(!isAllDoctors)} className={`flex items-center gap-2 px-4 py-2 border rounded-xl shadow-sm transition-colors ${isAllDoctors ? 'bg-[#005bc1] text-white border-[#005bc1]' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}>
+                            <span className={`material-symbols-outlined text-[18px] ${isAllDoctors ? 'text-white' : 'text-slate-500'}`}>filter_list</span>
+                            <span className="text-sm font-bold">All Doctors</span>
                         </button>
                         
-                        <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 transition-colors">
-                            <span className="material-symbols-outlined text-slate-500 text-[18px]">door_open</span>
-                            <span className="text-sm font-bold text-slate-700">Exam Rooms</span>
+                        <button onClick={() => setIsExamRooms(!isExamRooms)} className={`flex items-center gap-2 px-4 py-2 border rounded-xl shadow-sm transition-colors ${isExamRooms ? 'bg-[#005bc1] text-white border-[#005bc1]' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`}>
+                            <span className={`material-symbols-outlined text-[18px] ${isExamRooms ? 'text-white' : 'text-slate-500'}`}>door_open</span>
+                            <span className="text-sm font-bold">Exam Rooms</span>
                         </button>
                     </div>
                 </div>
@@ -144,7 +150,7 @@ export default function Appointments() {
                         <div className="absolute top-0 left-20 right-0 bottom-0 flex z-10 p-1">
                             {/* Mon Column */}
                             <div className="flex-1 relative">
-                                <div className="absolute left-2 right-2 bg-blue-50 border border-blue-200 rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer" style={{ top: '100px', height: '75px' }}>
+                                <div onClick={() => setSelectedAppointment({name: 'Beatrice Thorne', type: 'Cardiology Check-up', time: '09:00 - 09:45'})} className="absolute left-2 right-2 bg-blue-50 border border-blue-200 rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer" style={{ top: '100px', height: '75px' }}>
                                     <h4 className="font-bold text-[#005bc1] text-sm leading-tight">Beatrice Thorne</h4>
                                     <p className="text-[11px] text-[#005bc1]/80 mt-0.5 leading-tight">Cardiology Check-up</p>
                                     <span className="text-[10px] font-bold text-[#005bc1] mt-2 block">09:00 - 09:45</span>
@@ -153,7 +159,7 @@ export default function Appointments() {
                             
                             {/* Tue Column */}
                             <div className="flex-1 relative bg-[#eef3fb]/30 border-r border-slate-100">
-                                <div className="absolute left-2 right-2 bg-[#005bc1] rounded-2xl p-3.5 shadow-lg shadow-blue-500/30 cursor-pointer overflow-hidden group flex flex-col" style={{ top: '50px', height: '120px' }}>
+                                <div onClick={() => setSelectedAppointment({name: 'Marcus Holloway', type: 'Post-Op Review', time: '08:30 - 10:00'})} className="absolute left-2 right-2 bg-[#005bc1] rounded-2xl p-3.5 shadow-lg shadow-blue-500/30 cursor-pointer overflow-hidden group flex flex-col" style={{ top: '50px', height: '120px' }}>
                                     <div className="flex items-center gap-1.5 mb-1 shrink-0">
                                         <span className="material-symbols-outlined text-white text-[12px]">emergency</span>
                                         <span className="text-[9px] font-bold text-white tracking-widest uppercase">Urgent</span>
@@ -247,7 +253,7 @@ export default function Appointments() {
                         </div>
                         <div className="flex items-center justify-between bg-slate-50 rounded-xl p-3">
                             <span className="text-[13px] font-bold text-[#005bc1]">In 12 minutes</span>
-                            <button className="text-[11px] font-bold text-slate-500 tracking-wider hover:text-slate-800 transition-colors uppercase">Notify Room</button>
+                            <button onClick={() => alert('Quarto da clínica notificado para receber o paciente Eleanor Rigby.')} className="text-[11px] font-bold text-slate-500 tracking-wider hover:text-slate-800 transition-colors uppercase">Notify Room</button>
                         </div>
                     </div>
 
@@ -255,15 +261,15 @@ export default function Appointments() {
                     <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between h-40">
                         <span className="text-[11px] font-bold text-slate-500 tracking-widest uppercase mb-2 block">Quick Actions</span>
                         <div className="flex flex-wrap gap-2 gap-y-3">
-                            <button className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 transition-colors px-4 py-2.5 rounded-full">
+                            <button onClick={() => window.print()} className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 transition-colors px-4 py-2.5 rounded-full">
                                 <span className="material-symbols-outlined text-[16px] text-slate-600">print</span>
                                 <span className="text-xs font-bold text-slate-700">Print Daily</span>
                             </button>
-                            <button className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 transition-colors px-4 py-2.5 rounded-full">
+                            <button onClick={() => alert('Lembretes enviados por SMS/WhatsApp para todos os pacientes de hoje.')} className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 transition-colors px-4 py-2.5 rounded-full">
                                 <span className="material-symbols-outlined text-[16px] text-slate-600">share</span>
                                 <span className="text-xs font-bold text-slate-700">Send Reminders</span>
                             </button>
-                            <button className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 transition-colors px-4 py-2.5 rounded-full">
+                            <button onClick={() => alert('Acesso a bloqueio de agenda aberto.')} className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 transition-colors px-4 py-2.5 rounded-full">
                                 <span className="material-symbols-outlined text-[16px] text-slate-600">block</span>
                                 <span className="text-xs font-bold text-slate-700">Block Time</span>
                             </button>
@@ -303,6 +309,38 @@ export default function Appointments() {
                                 <button type="submit" className="px-5 py-2.5 rounded-xl font-bold bg-[#005bc1] text-white hover:bg-blue-700 transition-colors shadow-sm">Confirmar</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal for viewing appointment details */}
+            {selectedAppointment && (
+                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
+                    <div className="bg-white rounded-3xl w-full max-w-sm p-8 shadow-2xl">
+                        <div className="flex justify-between items-start mb-4">
+                            <h2 className="text-xl font-bold font-headline text-slate-800">Detalhes</h2>
+                            <button onClick={() => setSelectedAppointment(null)} className="text-slate-400 hover:text-slate-600">
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Paciente</p>
+                                <p className="text-lg font-bold text-slate-800">{selectedAppointment.name}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Procedimento</p>
+                                <p className="text-base text-slate-700">{selectedAppointment.type}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Horário</p>
+                                <p className="text-base font-mono text-slate-700">{selectedAppointment.time}</p>
+                            </div>
+                        </div>
+                        <div className="mt-8 flex gap-3">
+                            <button className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl transition-colors">Reagendar</button>
+                            <button className="flex-1 bg-[#005bc1] hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-colors">Atender</button>
+                        </div>
                     </div>
                 </div>
             )}

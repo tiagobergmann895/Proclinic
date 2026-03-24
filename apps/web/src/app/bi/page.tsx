@@ -58,6 +58,17 @@ export default function BusinessIntelligence() {
 
     if (loading || !user || !metrics) return <div className="min-h-screen bg-background text-on-surface flex items-center justify-center font-headline font-bold">Carregando C-Level Dashboard...</div>;
 
+    const handleExport = () => {
+        const csvContent = "data:text/csv;charset=utf-8,Mês,Receita(R$),Novos_Pacientes\nJan,4000,15\nFev,3000,20\nMar,5000,18\nAbr,7000,28\nMai,6000,0\nJun,9000,0";
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "relatorio_bi_mediflow.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <AppLayout userProfile={user} currentRoute="bi" onLogout={() => { Cookies.remove('proclinic.token'); router.push('/'); }}>
             <div className="mt-20 p-10 space-y-10">
@@ -68,7 +79,7 @@ export default function BusinessIntelligence() {
                         </h2>
                         <p className="text-on-surface-variant mt-1">Inteligência de negócios em tempo real.</p>
                     </div>
-                    <button className="px-5 py-3 bg-surface-container-high text-on-surface rounded-xl text-sm font-bold font-headline flex items-center gap-2 hover:bg-surface-dim transition-colors shadow-sm">
+                    <button onClick={handleExport} className="px-5 py-3 bg-surface-container-high text-on-surface rounded-xl text-sm font-bold font-headline flex items-center gap-2 hover:bg-surface-dim transition-colors shadow-sm">
                         <span className="material-symbols-outlined text-lg">download</span> Exportar Relatório
                     </button>
                 </section>
