@@ -11,9 +11,11 @@ import { TransactionModule } from './transaction/transaction.module';
 import { ProductModule } from './product/product.module';
 import { StockMovementModule } from './stock-movement/stock-movement.module';
 import { BiModule } from './bi/bi.module';
+import { SadtGuideModule } from './sadt-guide/sadt-guide.module';
+import { ProfessionalModule } from './professional/professional.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, PatientModule, AppointmentModule, ClinicalRecordModule, InvoiceModule, TransactionModule, ProductModule, StockMovementModule, BiModule],
+  imports: [AuthModule, PrismaModule, PatientModule, AppointmentModule, ClinicalRecordModule, InvoiceModule, TransactionModule, ProductModule, StockMovementModule, BiModule, SadtGuideModule, ProfessionalModule],
   controllers: [AppController],
   providers: [AppService],
 })

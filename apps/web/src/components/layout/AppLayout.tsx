@@ -42,6 +42,7 @@ export function AppLayout({ children, userProfile, currentRoute, onLogout }: App
                     {renderNav('/appointments', 'calendar_month', 'Appointments', 'appointments')}
                     {renderNav('/patients', 'group', 'Pacientes', 'patients')}
                     {renderNav('/records', 'medical_information', 'EHR Records', 'records')}
+                    {renderNav('/sadt', 'assignment', 'Guias SADT', 'sadt')}
                     {renderNav('/finance', 'payments', 'Financials', 'finance')}
                     {renderNav('/inventory', 'inventory', 'Inventory', 'inventory')}
                 </nav>

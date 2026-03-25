@@ -22,6 +22,7 @@ model Tenant {
   transactions    Transaction[]
   products        Product[]
   stockMovements  StockMovement[]
+  sadtGuides      SadtGuide[]
 }
 
 model User {
@@ -60,6 +61,7 @@ model Patient {
   appointments    Appointment[]
   clinicalRecords ClinicalRecord[]
   invoices        Invoice[]
+  sadtGuides      SadtGuide[]
 
   @@index([tenantId])
 }
@@ -78,6 +80,7 @@ model Professional {
 
   appointments    Appointment[]
   clinicalRecords ClinicalRecord[]
+  sadtGuides      SadtGuide[]
 
   @@index([tenantId])
 }
@@ -206,4 +209,31 @@ model StockMovement {
 
   @@index([tenantId])
   @@index([productId])
+}
+
+model SadtGuide {
+  id             String       @id @default(cuid())
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id])
+  patientId      String
+  patient        Patient      @relation(fields: [patientId], references: [id])
+  professionalId String
+  professional   Professional @relation(fields: [professionalId], references: [id])
+
+  guideNumber       String   @default(cuid())
+  requestDate       DateTime @default(now())
+  insurerName       String   @default("Particular")
+  insurerCard       String?
+  cid10             String?
+  clinicalIndication String?
+  procedures        Json     @default("[]")
+  observations      String?
+  status            String   @default("PENDING") // PENDING, EXECUTED, CANCELLED
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([patientId])
+  @@index([professionalId])
 }
