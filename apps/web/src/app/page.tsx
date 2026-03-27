@@ -80,11 +80,11 @@ export default function LoginPage() {
                                     <span className="material-symbols-outlined absolute left-4 text-slate-400 group-focus-within:text-[#005bc1] transition-colors text-[20px]">corporate_fare</span>
                                     <input
                                         id="emailInput"
-                                        type="email"
+                                        type="text"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         className="w-full bg-[#FCFCFD] border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-[15px] font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#005bc1] focus:ring-4 focus:ring-blue-50 transition-all font-headline"
-                                        placeholder="admin@mediflow.com"
+                                        placeholder="admin@mediflow.com ou usuário"
                                         required
                                     />
                                 </div>
